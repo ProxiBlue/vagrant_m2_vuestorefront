@@ -1,0 +1,21 @@
+map $http_host $MAGE_RUN_CODE {
+    default '';
+    sante.${DEV_DOMAIN} sante;
+    edemo.${DEV_DOMAIN} edemo;
+}
+
+upstream fastcgi_backend {
+    server  unix:/run/php/php7.2-fpm-magento.sock;
+}
+
+server {
+ listen 172.20.0.200:80;
+ listen 172.20.0.200:443 ssl http2 default_server;
+ server_name magento.${DEV_DOMAIN};
+ include snippets/self-signed.conf;
+ include snippets/ssl-params.conf;
+ set $MAGE_ROOT /vagrant/sites/magento2/;
+ set $MAGE_MODE developer;
+ set $MAGE_RUN_TYPE website;
+ include /vagrant/sites/magento2/nginx.conf.sample;
+}

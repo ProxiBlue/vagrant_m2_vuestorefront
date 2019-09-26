@@ -1,0 +1,69 @@
+map $http_host $storecode {
+    sante.${DEV_DOMAIN} sante;
+    edemo.${DEV_DOMAIN} edemo;
+}
+server {
+    error_log /var/log/main_sites.log debug;
+    listen 172.17.0.10:80;
+    listen 172.17.0.10:443 ssl http2 default_server;
+    include snippets/self-signed.conf;
+    include snippets/ssl-params.conf;
+    server_name ${DEV_DOMAIN};
+    root /vagrant/sites/enjo/docroot;
+    error_page 404 = /errors/404.php;
+    error_page 503 = /errors/503.php;
+    location ~ ^/(skin|js|media)/ {
+       try_files $uri =404;
+    }
+    location / {
+        index index.html index.php; ## Allow a static html file to be shown first
+        try_files $uri $uri/ @handler; ## If missing pass the URI to Magento's front handler
+        expires 30d; ## Assume all files are cachable
+    }
+    ## These locations would be hidden by .htaccess normally
+    location /app/                { deny all; }
+    location /includes/           { deny all; }
+    location /lib/                { deny all; }
+    location /media/downloadable/ { deny all; }
+    location /pkginfo/            { deny all; }
+    location /report/config.xml   { deny all; }
+    location /var/                { deny all; }
+    ## Disable .htaccess and other hidden files
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+    location @handler { ## Magento uses a common front handler
+        rewrite / /index.php;
+    }
+    location ~ \.php/ { ## Forward paths like /js/index.php/x.js to relevant handler
+        rewrite ^(.*\.php)/ $1 last;
+    }
+    location ~ \.php$ { ## Execute PHP scripts
+        if (!-e $request_filename) { rewrite / /index.php last; } ## Catch 404s that try_files miss
+        expires        off; ## Do not cache dynamic content
+       	include        fastcgi_params; ## See /etc/nginx/fastcgi_params
+        fastcgi_pass   unix:/run/php/php7.x-fpm-enjo.sock;
+        #fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+	fastcgi_param DOCUMENT_ROOT $realpath_root;
+	fastcgi_param  MAGE_RUN_CODE $storecode;  ## Store code is defined in administration > Configuration > Manage Stores
+        fastcgi_param  MAGE_RUN_TYPE website;
+        fastcgi_param  SERVER_NAME $http_host;
+	fastcgi_param  MAGE_IS_DEVELOPER_MODE 1;
+        fastcgi_read_timeout 300;
+
+    }
+
+    location ~* (.+)\.(\d+)\.(js|css|png|jpg|jpeg|gif)$ {
+       try_files $uri $1.$3;
+    }
+
+    if ($http_host = "sante.${DEV_DOMAIN}") {
+     rewrite ^/robots.txt /robots-sante.txt break;
+    }
+
+    disable_symlinks off;
+
+}
