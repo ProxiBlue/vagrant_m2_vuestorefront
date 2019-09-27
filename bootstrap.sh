@@ -15,6 +15,11 @@ echo "172.20.0.201 redis " >>/etc/hosts
 echo "172.20.0.202  elasticsearch" >>/etc/hosts
 echo "172.20.0.203  rabbitmq" >>/etc/hosts
 
+export GIT_VESRION=$(git --version |awk '{print $3}')
+wget https://raw.githubusercontent.com/git/git/v${GIT_VESRION}/contrib/completion/git-completion.bash
+mv ./git-completion.bash /home/vagrant
+source /home/vagrant/git-completion.bash
+
 envsubst '${DEV_DOMAIN}' < /etc/nginx/sites-available/magento > /etc/nginx/sites-enabled/magento
 service nginx stop
 service nginx start

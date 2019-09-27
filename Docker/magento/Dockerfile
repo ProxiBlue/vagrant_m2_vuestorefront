@@ -123,8 +123,6 @@ ADD common/nginx/magento /etc/nginx/sites-available/
 ADD common/xdebug.ini /etc/php/7.2/mods-available/xdebug.ini
 ADD common/supervisord* /etc/supervisor/conf.d/
 
-ADD https://raw.githubusercontent.com/git/git/$(git --version |awk '{print $3}')/contrib/completion/git-completion.bash /home/vagrant/
-
 RUN chmod 0400 /etc/sudoers.d/01_vagrant && \
  echo "source ~/git-completion.bash" >>/home/vagrant/.bashrc && \
  su vagrant -c "git clone https://github.com/magicmonty/bash-git-prompt.git ~/.bash-git-prompt --depth=1 && echo 'export GIT_PROMPT_ONLY_IN_REPO=1' >> ~/.bashrc && echo 'export GIT_PROMPT_FETCH_REMOTE_STATUS=0' >> ~/.bashrc && echo 'source ~/.bash-git-prompt/gitprompt.sh' >> ~/.bashrc" && \
