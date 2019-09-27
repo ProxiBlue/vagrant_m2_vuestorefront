@@ -89,7 +89,7 @@ RUN useradd -G www-data --create-home --shell /bin/bash vagrant && \
       && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
 ADD https://raw.githubusercontent.com/mitchellh/vagrant/master/keys/vagrant.pub /home/vagrant/.ssh/authorized_keys
-ADD Docker/magento/common/wrap_chrome_binary /tmp/
+ADD common/wrap_chrome_binary /tmp/
 RUN bash /tmp/wrap_chrome_binary && \
 export CD_VERSION=$(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE) \
   && echo "Using chromedriver version: "$CD_VERSION \
@@ -101,7 +101,7 @@ export CD_VERSION=$(wget -qO- https://chromedriver.storage.googleapis.com/LATEST
   && chmod 755 /opt/selenium/chromedriver-$CD_VERSION \
   && sudo ln -fs /opt/selenium/chromedriver-$CD_VERSION /usr/bin/chromedriver
 
-ADD Docker/magento/common/generate_config /tmp/
+ADD common/generate_config /tmp/
 RUN bash /tmp/generate_config > /opt/selenium/config.json && \
 /usr/bin/wget -q --no-verbose --no-check-certificate https://files.magerun.net/n98-magerun.phar && \
  /bin/chmod +x ./n98-magerun.phar && \
@@ -113,15 +113,15 @@ RUN wget https://phar.phpunit.de/phpunit.phar && /bin/chmod a+rwx phpunit.phar &
 mv phpunit.phar /usr/local/bin/phpunit.phar && \
 echo "client_max_body_size 20M;" >>/etc/nginx/conf.d/client_max_body_size.conf && \
 echo "vagrant ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_vagrant
-ADD Docker/magento/common/php-fpm/* /etc/php/7.2/fpm/pool.d/
+ADD common/php-fpm/* /etc/php/7.2/fpm/pool.d/
 RUN rm -rf /etc/php/7.2/fpm/pool.d/www.conf && mkdir /run/php && rm /etc/nginx/sites-enabled/default
-ADD Docker/magento/common/.inputrc /home/vagrant/
-ADD Docker/magento/common/nginx/* /etc/nginx/snippets/
-ADD Docker/magento/common/nginx/ssl/certs/* /etc/ssl/certs/
-ADD Docker/magento/common/nginx/ssl/private/* /etc/ssl/private/
-ADD Docker/magento/common/nginx/magento /etc/nginx/sites-available/
-ADD Docker/magento/common/xdebug.ini /etc/php/7.2/mods-available/xdebug.ini
-ADD Docker/magento/common/supervisord* /etc/supervisor/conf.d/
+ADD common/.inputrc /home/vagrant/
+ADD common/nginx/* /etc/nginx/snippets/
+ADD common/nginx/ssl/certs/* /etc/ssl/certs/
+ADD common/nginx/ssl/private/* /etc/ssl/private/
+ADD common/nginx/magento /etc/nginx/sites-available/
+ADD common/xdebug.ini /etc/php/7.2/mods-available/xdebug.ini
+ADD common/supervisord* /etc/supervisor/conf.d/
 
 ADD https://raw.githubusercontent.com/git/git/$(git --version |awk '{print $3}')/contrib/completion/git-completion.bash /home/vagrant/
 
