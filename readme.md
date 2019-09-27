@@ -70,3 +70,42 @@ The next line: ```#d.build_dir = "./Docker/magento"``` unhash
 
 Now you can run all the same commands, but the initial up will build the docker image locally
 
+## Some environment details
+
+### SSH
+
+You HOST user .ssh folder is mounted within the magento Docker box under /home/vagrant/.ssh (vagrant is your default 
+user inside the Docker environment)
+This allow you to ssh from within the vagrant environment to any external resources, as all yoru keys are available, 
+including your hosts config file.
+
+### GUI applications
+
+Your HOST x11-org SOCKET is also mounted within the magento Docker box.
+This will allow you to run any gui application from within teh Docker box, but the GUI will appear in the HOST, as if 
+the application runs on teh HOST
+
+try for example:
+
+* export DISPLAY=:0 && google-chrome --no-sandbox
+
+### Composer auth / config
+
+Your HOST ~/.composer/ folder is mounted within the magento Docker box. Thsi allows you to place coposer auth.json 
+in your usual home folder on the HOST, and that authentication file will be used with composer in the Docker environment
+
+### ngrok (expose dev instance to external)
+
+ngrok makes it possible to test the site from a mobile, or to allow someone to view the code/functionality on your 
+dev machine, prior to deployment to any server, or code commit to repo
+Mostly it is used for mobile testing
+You will need a free authtoken form https://dashboard.ngrok.com
+
+
+* ssh into vagrant
+* run ```ngrok http https://<SITE URL>```
+
+You can access ngrok admin port on 172.20.0.200:4040
+
+
+

@@ -133,6 +133,6 @@ ssh-keyscan -t rsa,dsa github.com >> /root/.ssh/known_hosts && \
 chmod 644 /root/.ssh/known_hosts && \
 su vagrant -c "composer global require hirak/prestissimo" && \
 mkdir /var/run/sshd
-EXPOSE 22 80 443 9000
+EXPOSE 22 80 443 9000 4040
 CMD ["/usr/bin/supervisord", "-n"]
 RUN apt-get autoremove -y && apt-get clean
