@@ -26,8 +26,8 @@ Vagrant.configure('2') do |config|
         magento.vm.network :private_network, ip: "172.20.0.200", subnet: "172.20.0.0/16"
         magento.vm.hostname = "magento"
         magento.vm.provider 'docker' do |d|
-            #d.image = "enjo/ubuntu-devbox:latest"
-            d.build_dir = "./Docker/magento"
+            d.image = "enjo/magento2:latest"
+            #d.build_dir = "./Docker/magento"
             d.has_ssh = true
             d.name = "magento"
             d.create_args = ["--cap-add=NET_ADMIN"]

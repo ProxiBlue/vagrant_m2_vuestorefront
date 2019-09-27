@@ -59,3 +59,14 @@ you can now enter the environment using : ```vagrant ssh``` (this will be the ma
 
 example being inside new environment folder: ```cp -xav ~/workspace/vagrant/sites/m2 ./sites/magento```
 
+## OMG, docker hub is offline!
+
+Don't fear, you can initiate a local build of your environment. 
+It can take a while (about 20 minutes), but only needs to build once
+
+Edit the Vagrant file.
+Find this line: ```d.image = "enjo/magento2:latest"``` and has it out
+The next line: ```#d.build_dir = "./Docker/magento"``` unhash
+
+Now you can run all the same commands, but the initial up will build the docker image locally
+
