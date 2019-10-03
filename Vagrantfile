@@ -1,23 +1,29 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-# Run with: vagrant up --provider=docker
-# to get a dns entry for the docker machines use DNSGUARD
+require 'fileutils'
+
 # Generate a random port number
-# fixes issue where two boxes try and map port 22.
+# fixes issue where two boxes try and map port 22, if you run multiple vagrant environments in one host
 r = Random.new
 ssh_port = r.rand(1000...5000)
+vagrant_root = File.dirname(__FILE__)
 dev_domain = ENV['DEV_DOMAIN'] || 'enjo.test'
+
 puts "========================================================"
-puts "using #{dev_domain}"
+puts "base domain : #{dev_domain}"
+puts "folder : #{vagrant_root}"
 puts "========================================================"
 
 Vagrant.configure('2') do |config|
     config.vm.boot_timeout = 1800
-
+    config.hostmanager.enabled = true
+    config.hostmanager.manage_host = true
+    config.hostmanager.manage_guest = true
+    config.hostmanager.ignore_private_ip = false
+    config.hostmanager.include_offline = true
     config.vm.define "magento", primary: true do |magento|
         magento.vm.provision "shell" do |s|
             s.path = "bootstrap.sh"
-            s.args = "#{dev_domain}"
         end
         magento.ssh.username = "vagrant"
         magento.ssh.password = "vagrant"
@@ -33,6 +39,7 @@ Vagrant.configure('2') do |config|
             d.create_args = ["--cap-add=NET_ADMIN"]
             d.remains_running = true
             d.volumes = ["/tmp/.X11-unix:/tmp/.X11-unix", ENV['HOME']+"/.ssh/:/home/vagrant/.ssh", ENV['HOME']+"/.composer:/home/vagrant/.composer"]
+            d.env = { "DEV_DOMAIN" => "#{dev_domain}" }
         end
     end
 
@@ -48,14 +55,13 @@ Vagrant.configure('2') do |config|
         end
     end
 
-    config.vm.define "elasticsearch", primary: false do |elasticsearch|
-        elasticsearch.vm.network "forwarded_port", guest: 9200, host: 9200, protocol: "tcp"
-        elasticsearch.vm.network :private_network, ip: "172.20.0.202", subnet: "172.20.0.0/16"
-        elasticsearch.vm.hostname = "elasticsearch"
-        elasticsearch.vm.provider 'docker' do |d|
-            d.image = "elasticsearch:2.3"
+    config.vm.define "elasticsearchm2", primary: false do |elasticsearchm2|
+        elasticsearchm2.vm.network :private_network, ip: "172.20.0.202", subnet: "172.20.0.0/16"
+        elasticsearchm2.vm.hostname = "elasticsearchm2"
+        elasticsearchm2.vm.provider 'docker' do |d|
+            d.image = "docker.elastic.co/elasticsearch/elasticsearch:6.8.3"
             d.has_ssh = false
-            d.name = "elasticsearch"
+            d.name = "elasticsearchm2"
             d.remains_running = true
         end
     end
@@ -70,6 +76,100 @@ Vagrant.configure('2') do |config|
             d.remains_running = true
         end
     end
+
+    config.vm.define "elasticsearch", primary: false do |elasticsearch|
+        vue_elastic_config="#{vagrant_root}/sites/vue-storefront-api/docker/elasticsearch/config/elasticsearch.yml"
+        elasticsearch.trigger.before :up do |trigger|
+            trigger.name = "overlay config"
+            # Check if overlay config for elastic search exists.
+            if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/elasticsearch/config/elasticsearch.yml")
+                vue_elastic_config="#{vagrant_root}/vuestorefront-config-overlay/elasticsearch/config/elasticsearch.yml"
+                trigger.info = "Found overlay config: #{vue_elastic_config}"
+            end
+        end
+        elasticsearch.vm.network :private_network, ip: "172.20.0.204", subnet: "172.20.0.0/16"
+        elasticsearch.vm.hostname = "elasticsearch"
+        elasticsearch.vm.provider 'docker' do |d|
+            d.build_dir = "#{vagrant_root}/sites/vue-storefront-api/docker/elasticsearch"
+            d.dockerfile = "Dockerfile"
+            d.has_ssh = false
+            d.name = "elasticsearch"
+            d.remains_running = true
+            d.volumes = [
+                "#{vue_elastic_config}:/usr/share/elasticsearch/config/elasticsearch.yml:ro",
+                "#{vagrant_root}/sites/vue-storefront-api/docker/elasticsearch/data:/usr/share/elasticsearch/data"
+                ]
+            d.env =  { "ES_JAVA_OPTS" => "-Xmx512m -Xms512m" }
+        end
+    end
+
+    config.vm.define "kibana", primary: false do |kibana|
+        vue_kibana_config="#{vagrant_root}/sites/vue-storefront-api/docker/kibana/config/"
+        kibana.trigger.before :up do |trigger|
+            trigger.name = "overlay config"
+            # Check if overlay config for kibana exists.
+            if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/kibana/config/kibana.yml")
+                vue_kibana_config="#{vagrant_root}/vuestorefront-config-overlay/kibana/config/"
+                trigger.info = "Found overlay config: #{vue_kibana_config}"
+            end
+        end
+        kibana.vm.network :private_network, ip: "172.20.0.205", subnet: "172.20.0.0/16"
+        kibana.vm.hostname = "kibana"
+        kibana.vm.provider 'docker' do |d|
+            d.build_dir = "#{vagrant_root}/sites/vue-storefront-api/docker/kibana"
+            d.dockerfile = "Dockerfile"
+            d.has_ssh = false
+            d.name = "kibana"
+            d.remains_running = true
+            d.volumes = [
+                "#{vue_kibana_config}:/usr/share/kibana/config:ro"
+                ]
+        end
+    end
+
+    config.vm.define "vueapi", primary: false do |vueapi|
+        vueapi.trigger.before :up do |trigger|
+            trigger.name = "overlay config"
+            # Check if vue local.json config exists, and copy it to the vue config folder
+            # any edits must be made in teh overlay file. Edits in teh destination file will be overwritten
+            if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront-api/config/local.json")
+                FileUtils.copy_file("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront-api/config/local.json",
+                "#{vagrant_root}/sites/vue-storefront-api/config/local.json")
+                trigger.info = "Found overlay local.json. It was copied to the base vue config folder."
+            end
+            # check that the /tmp/vue folder exists (which is used to simulated teh tmpfs setup as per vue composer files
+            if File.directory?("/tmp/vue")
+                FileUtils.rm_rf("/tmp/vue")
+                FileUtils.mkdir_p("/tmp/vue")
+                trigger.info = "Temp folder /tmp/vue created."
+            end
+
+        end
+        vueapi.vm.network :private_network, ip: "172.20.0.206", subnet: "172.20.0.0/16"
+        vueapi.vm.hostname = "vueapi"
+        vueapi.vm.provider 'docker' do |d|
+            d.build_dir = "#{vagrant_root}/sites/vue-storefront-api/"
+            d.dockerfile = "docker/vue-storefront-api/Dockerfile"
+            d.has_ssh = false
+            d.name = "vuepai"
+            d.remains_running = true
+            d.volumes = [
+                "#{vagrant_root}/sites/vue-storefront-api/config:/var/www/config",
+                "#{vagrant_root}/sites/vue-storefront-api/ecosystem.json:/var/www/ecosystem.json",
+                "#{vagrant_root}/sites/vue-storefront-api/migrations:/var/www/migrations",
+                "#{vagrant_root}/sites/vue-storefront-api/package.json:/var/www/package.json",
+                "#{vagrant_root}/sites/vue-storefront-api/babel.config.js:/var/www/babel.config.js",
+                "#{vagrant_root}/sites/vue-storefront-api/tsconfig.json:/var/www/tsconfig.json",
+                "#{vagrant_root}/sites/vue-storefront-api/nodemon.json:/var/www/nodemon.json",
+                "#{vagrant_root}/sites/vue-storefront-api/scripts:/var/www/scripts",
+                "#{vagrant_root}/sites/vue-storefront-api/src:/var/www/src",
+                "#{vagrant_root}/sites/vue-storefront-api/var:/var/www/var",
+                "/tmp/vue:/var/www/dist"
+                ]
+        end
+    end
+
+
 
 
 
