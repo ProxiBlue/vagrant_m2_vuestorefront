@@ -4,6 +4,7 @@
 
 * Vagrant 2.2.5 or greater
 * Docker 18.09.7 or greater
+* vagrant plugin: https://github.com/devopsgroup-io/vagrant-hostmanager
 
 ## Layout / Structure
 
@@ -106,6 +107,16 @@ You will need a free authtoken form https://dashboard.ngrok.com
 * run ```ngrok http https://<SITE URL>```
 
 You can access ngrok admin port on 172.20.0.200:4040
+
+## Debugging startup
+
+If you find that one of the docker instacnes is not persisting, it is likely there is a startup issue with the packages
+within that docker instance.
+
+Do:
+
+* ```docker ps -a``` to get the instacne id of the problematic instance
+* ```docker logs <INSTANCE ID>``` to get the output of that instance startup console, which can help debug the issue
 
 
 
