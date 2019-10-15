@@ -1,6 +1,6 @@
 {
   "server": {
-    "host": "vueapi",
+    "host": "vueapi.enjo.test",
     "port": 8080,
     "searchEngine": "elasticsearch"
   },
@@ -18,9 +18,9 @@
     "password": "changeme",
     "min_score": 0.01,
     "indices": [
-      "vue_storefront_catalog",
-      "vue_storefront_catalog_sante",
-      "vue_storefront_catalog_edemo"
+      "vue_storefront_magento_default",
+      "vue_storefront_magento_sante",
+      "vue_storefront_magento_edemo"
     ],
     "indexTypes": [
       "product",
@@ -35,7 +35,7 @@
   "redis": {
     "host": "redis",
     "port": 6379,
-    "db": 0,
+    "db": 5,
     "auth": false
   },
   "kue": {},
@@ -62,8 +62,8 @@
       "name": "Enjo Pty Ltd",
       "url": "/enjo",
       "elasticsearch": {
-        "host": "vueapi:8080/api/catalog",
-        "index": "vue_storefront_catalog_enjo"
+        "host": "http://vueapi.enjo.test:8080/api/catalog",
+        "index": "vue_storefront_magento_default"
       },
       "msi": {
         "stockId": 1
@@ -92,8 +92,8 @@
       "name": "Sante Store",
       "url": "/sante",
       "elasticsearch": {
-        "host": "vueapi:8080/api/catalog",
-        "index": "vue_storefront_catalog_sante"
+        "host": "http://vueapi.enjo.test:8080/api/catalog",
+        "index": "vue_storefront_magento_sante"
       },
       "msi": {
         "stockId": 1
@@ -122,8 +122,8 @@
       "name": "eDemo Store",
       "url": "/edemo",
       "elasticsearch": {
-        "host": "vueapi:8080/api/catalog",
-        "index": "vue_storefront_catalog_edemo"
+        "host": "http://vueapi.enjo.test:8080/api/catalog",
+        "index": "vue_storefront_magento_edemo"
       },
       "msi": {
         "stockId": 1
@@ -183,29 +183,14 @@
     }
   },
   "magento2": {
-    "imgUrl": "http://magento/media/catalog/product",
-    "assetPath": "/../var/magento2-sample-data/pub/media",
+    "imgUrl": "http://magento.enjo.test/media/catalog/product",
+    "assetPath": "/pub/media",
     "api": {
-      "url": "http://magento/rest",
-      "consumerKey": "byv3730rhoulpopcq64don8ukb8lf2gq",
-      "consumerSecret": "u9q4fcobv7vfx9td80oupa6uhexc27rb",
-      "accessToken": "040xx3qy7s0j28o3q0exrfop579cy20m",
-      "accessTokenSecret": "7qunl3p505rubmr7u1ijt7odyialnih9"
-    }
-  },
-  "magento1": {
-    "imgUrl": "https://magento.enjo.test/media/catalog/product",
-    "assetPath": "",
-    "magentoUserName": "",
-    "magentoUserPassword": "",
-    "httpUserName": "",
-    "httpUserPassword": "",
-    "api": {
-      "url": "http://magento-demo.local/vsbridge",
-      "consumerKey": "",
-      "consumerSecret": "",
-      "accessToken": "",
-      "accessTokenSecret": ""
+      "url": "http://magento.enjo.test/rest",
+      "consumerKey": "oo512d33l03hllk5eql2a37koocpu9mk",
+      "consumerSecret": "m88783ol4jfxcid540lmk4og8q0rpkbu",
+      "accessToken": "vzdgujb4ym7u71rypwpn0cwggd4sxnfp",
+      "accessTokenSecret": "r3932ydmx0m4h1tmwe4vfl4qbdaxa3x3"
     }
   },
   "imageable": {
@@ -213,8 +198,7 @@
     "imageSizeLimit": 1024,
     "whitelist": {
       "allowedHosts": [
-        ".*divante.pl",
-        ".*vuestorefront.io"
+        "*.enjo.test"
       ]
     },
     "cache": {

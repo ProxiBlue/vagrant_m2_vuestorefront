@@ -19,3 +19,4 @@ server {
  set $MAGE_RUN_TYPE website;
  include /vagrant/sites/magento2/nginx.conf.sample;
 }
+
