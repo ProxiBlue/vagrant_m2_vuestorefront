@@ -1,7 +1,5 @@
 map $http_host $MAGE_RUN_CODE {
     default '';
-    sante.${DEV_DOMAIN} sante;
-    edemo.${DEV_DOMAIN} edemo;
 }
 
 upstream fastcgi_backend {

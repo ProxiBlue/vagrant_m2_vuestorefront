@@ -1,5 +1,5 @@
 FROM ubuntu:18.04
-LABEL maintainer="Lucas van Staden lucas.vanstaden@enjo.com.au"
+LABEL maintainer="Lucas van Staden sales@proxiblue.com.au"
 
 ENV DEBIAN_FRONTEND noninteractive
 

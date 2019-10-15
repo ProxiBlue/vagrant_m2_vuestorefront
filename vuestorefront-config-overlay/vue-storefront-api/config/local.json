@@ -1,6 +1,6 @@
 {
   "server": {
-    "host": "vueapi.enjo.test",
+    "host": "vueapi",
     "port": 8080,
     "searchEngine": "elasticsearch"
   },
@@ -62,7 +62,7 @@
       "name": "Enjo Pty Ltd",
       "url": "/enjo",
       "elasticsearch": {
-        "host": "http://vueapi.enjo.test:8080/api/catalog",
+        "host": "http://vueapi:8080/api/catalog",
         "index": "vue_storefront_magento_default"
       },
       "msi": {
@@ -92,7 +92,7 @@
       "name": "Sante Store",
       "url": "/sante",
       "elasticsearch": {
-        "host": "http://vueapi.enjo.test:8080/api/catalog",
+        "host": "http://vueapi:8080/api/catalog",
         "index": "vue_storefront_magento_sante"
       },
       "msi": {
@@ -122,7 +122,7 @@
       "name": "eDemo Store",
       "url": "/edemo",
       "elasticsearch": {
-        "host": "http://vueapi.enjo.test:8080/api/catalog",
+        "host": "http://vueapi:8080/api/catalog",
         "index": "vue_storefront_magento_edemo"
       },
       "msi": {
@@ -183,10 +183,10 @@
     }
   },
   "magento2": {
-    "imgUrl": "http://magento.enjo.test/media/catalog/product",
+    "imgUrl": "http://magento/media/catalog/product",
     "assetPath": "/pub/media",
     "api": {
-      "url": "http://magento.enjo.test/rest",
+      "url": "http://magento/rest",
       "consumerKey": "oo512d33l03hllk5eql2a37koocpu9mk",
       "consumerSecret": "m88783ol4jfxcid540lmk4og8q0rpkbu",
       "accessToken": "vzdgujb4ym7u71rypwpn0cwggd4sxnfp",

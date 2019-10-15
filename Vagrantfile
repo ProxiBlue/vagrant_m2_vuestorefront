@@ -7,7 +7,7 @@ require 'fileutils'
 r = Random.new
 ssh_port = r.rand(1000...5000)
 vagrant_root = File.dirname(__FILE__)
-dev_domain = ENV['DEV_DOMAIN'] || 'enjo.test'
+dev_domain = ENV['DEV_DOMAIN'] || raise('You need to define a local DEV_DOMAIN environment variable!')
 mode = ENV['VAGRANT_MODE'] || 'dev'
 
 puts "========================================================"
@@ -45,8 +45,19 @@ Vagrant.configure('2') do |config|
         end
     end
 
+    config.vm.define "mysql", primary: false do |mysql|
+        mysql.vm.network :private_network, ip: "172.20.0.300", subnet: "172.20.0.0/16"
+        mysql.vm.hostname = "redis"
+        mysql.ssh.keys_only = false
+        mysql.vm.provider 'docker' do |d|
+            d.image = "redis:latest"
+            d.has_ssh = false
+            d.name = "mysql"
+            d.remains_running = true
+        end
+    end
+
     config.vm.define "redis", primary: false do |redis|
-        redis.vm.network "forwarded_port", guest: 6379, host: 6379, protocol: "tcp"
         redis.vm.network :private_network, ip: "172.20.0.201", subnet: "172.20.0.0/16"
         redis.vm.hostname = "redis"
         redis.ssh.keys_only = false
@@ -55,13 +66,6 @@ Vagrant.configure('2') do |config|
             d.has_ssh = false
             d.name = "redis"
             d.remains_running = true
-            d.create_args = [
-                "--add-host=magento.#{dev_domain}:172.20.0.200",
-                "--add-host=elasticsearch.#{dev_domain}:172.20.0.204",
-                "--add-host=kibana.#{dev_domain}:172.20.0.205",
-                "--add-host=vueapi.#{dev_domain}:172.20.0.206",
-                "--add-host=vuestorefront.#{dev_domain}:172.20.0.207"
-                ]
         end
     end
 
@@ -74,13 +78,6 @@ Vagrant.configure('2') do |config|
             d.has_ssh = false
             d.name = "elasticsearchm2"
             d.remains_running = true
-            d.create_args = [
-                            "--add-host=magento.#{dev_domain}:172.20.0.200",
-                            "--add-host=elasticsearch.#{dev_domain}:172.20.0.204",
-                            "--add-host=kibana.#{dev_domain}:172.20.0.205",
-                            "--add-host=vueapi.#{dev_domain}:172.20.0.206",
-                            "--add-host=vuestorefront.#{dev_domain}:172.20.0.207"
-                            ]
         end
     end
 
@@ -93,13 +90,6 @@ Vagrant.configure('2') do |config|
             d.has_ssh = false
             d.name = "rabbitmq"
             d.remains_running = true
-            d.create_args = [
-                            "--add-host=magento.#{dev_domain}:172.20.0.200",
-                            "--add-host=elasticsearch.#{dev_domain}:172.20.0.204",
-                            "--add-host=kibana.#{dev_domain}:172.20.0.205",
-                            "--add-host=vueapi.#{dev_domain}:172.20.0.206",
-                            "--add-host=vuestorefront.#{dev_domain}:172.20.0.207"
-                            ]
         end
     end
 
@@ -127,13 +117,6 @@ Vagrant.configure('2') do |config|
                 "#{vagrant_root}/sites/vue-storefront-api/docker/elasticsearch/data:/usr/share/elasticsearch/data"
                 ]
             d.env =  { "ES_JAVA_OPTS" => "-Xmx512m -Xms512m" }
-            d.create_args = [
-                            "--add-host=magento.#{dev_domain}:172.20.0.200",
-                            "--add-host=elasticsearch.#{dev_domain}:172.20.0.204",
-                            "--add-host=kibana.#{dev_domain}:172.20.0.205",
-                            "--add-host=vueapi.#{dev_domain}:172.20.0.206",
-                            "--add-host=vuestorefront.#{dev_domain}:172.20.0.207"
-                            ]
         end
     end
 
@@ -159,13 +142,7 @@ Vagrant.configure('2') do |config|
             d.volumes = [
                 "#{vue_kibana_config}:/usr/share/kibana/config:ro"
                 ]
-            d.create_args = [
-                            "--add-host=magento.#{dev_domain}:172.20.0.200",
-                            "--add-host=elasticsearch.#{dev_domain}:172.20.0.204",
-                            "--add-host=kibana.#{dev_domain}:172.20.0.205",
-                            "--add-host=vueapi.#{dev_domain}:172.20.0.206",
-                            "--add-host=vuestorefront.#{dev_domain}:172.20.0.207"
-                            ]
+            d.create_args = [ "--add-host=elasticsearch:172.20.0.204" ]
         end
     end
 
@@ -217,11 +194,9 @@ Vagrant.configure('2') do |config|
                       "PM2_ARGS" => "--no-daemon"
                     }
             d.create_args = [
-                            "--add-host=magento.#{dev_domain}:172.20.0.200",
-                            "--add-host=elasticsearch.#{dev_domain}:172.20.0.204",
-                            "--add-host=kibana.#{dev_domain}:172.20.0.205",
-                            "--add-host=vueapi.#{dev_domain}:172.20.0.206",
-                            "--add-host=vuestorefront.#{dev_domain}:172.20.0.207"
+                            "--add-host=magento:172.20.0.200",
+                            "--add-host=elasticsearch:172.20.0.204",
+                            "--add-host=vuestorefront:172.20.0.207"
                             ]
         end
     end
@@ -275,11 +250,9 @@ Vagrant.configure('2') do |config|
                       "PM2_ARGS" => "--no-daemon"
                     }
             d.create_args = [
-                            "--add-host=magento.#{dev_domain}:172.20.0.200",
-                            "--add-host=elasticsearch.#{dev_domain}:172.20.0.204",
-                            "--add-host=kibana.#{dev_domain}:172.20.0.205",
-                            "--add-host=vueapi.#{dev_domain}:172.20.0.206",
-                            "--add-host=vuestorefront.#{dev_domain}:172.20.0.207"
+                            "--add-host=magento:172.20.0.200",
+                            "--add-host=elasticsearch:172.20.0.204",
+                            "--add-host=vueapi:172.20.0.206",
                             ]
         end
     end
