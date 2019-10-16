@@ -47,7 +47,7 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
     * ```mkdir -p ./vuestorefront-config-overlay/vue-storefront/config/```
     * ```cp -xav ./sites/vue-storefront/config/default.json ././vuestorefront-config-overlay/vue-storefront/config/local.json```    
 * Follow this guide, and setup magento OAuth keys: https://docs.vuestorefront.io/guide/installation/magento.html (remember, you will edit the OVERLAY CONFIGS)
-    * you want to stop here: ```yarn mage2vs import``` - you only want to do teh OAuth keys, not the import, that is the next step!
+    * you want to stop here: ```yarn mage2vs import``` - you only want to do the OAuth keys, not the import, that is the next step!
 * Install https://github.com/DivanteLtd/magento2-vsbridge-indexer
     * ```vagrant ssh```
     * ```composer require divante/magento2-vsbridge-indexer-msi:0.1.0```    
@@ -57,10 +57,10 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
         * redis host: ```redis```
         * elasticsearch host: ```elasticsearch```
         * vue storefront api host: ```vueapi```
-        * magento host: ```magento.<YOUR DOMAIN>``` (you must use teh FQDN for magento, else magento will redirect)
+        * magento host: ```magento.<YOUR DOMAIN>``` (you must use the FQDN for magento, else magento will redirect)
         * vuew storefront : ```vuestorefront```
 * bring the entire environment down, then back up: ```exit``` && ```vagrant halt``` && ```vagrant up```
-* wait a moment for vuestorefront to start. you can follow the progress using : ```docker logs -f vuestorefront``` (NOTE: this is also the best way to debug, as you will get pointed errors noted inteh console. Example, connection errors)
+* wait a moment for vuestorefront to start. you can follow the progress using : ```docker logs -f vuestorefront``` (NOTE: this is also the best way to debug, as you will get pointed errors noted inthe console. Example, connection errors)
 
 Done, you should be able to browse to vuewstorefront using: http://vuestorefront:3000
 
@@ -154,8 +154,8 @@ including your hosts config file.
 #### GUI applications
 
 Your HOST x11-org SOCKET is also mounted within the magento Docker box.
-This will allow you to run any gui application from within teh Docker box, but the GUI will appear in the HOST, as if 
-the application runs on teh HOST
+This will allow you to run any gui application from within the Docker box, but the GUI will appear in the HOST, as if 
+the application runs on the HOST
 
 try for example:
 
@@ -187,7 +187,7 @@ You can access ngrok admin port on 172.20.0.200:4040
 
 #### The config overlay folder
 
-Since you require custom config for vue, you can place the appropriate local.json config files in teh folder ```vuestorefront-config-overlay```, ensuring
+Since you require custom config for vue, you can place the appropriate local.json config files in the folder ```vuestorefront-config-overlay```, ensuring
 the path matches that of the parent config.
 
 Example:
@@ -195,10 +195,17 @@ Example:
 To configure a local.json for vue-storefront-api, which has its config located now in ```sites/vue-storefront-api/config/default.json``` place your local.json file
 in ```vuestorefront-config-overlay/vue-storefront-api/config/local.json```
 
-Basically, and files placed in the overlay folder, matching the `parent` config folder structure, will be used instead of teh `parent`
+Basically, and files placed in the overlay folder, matching the `parent` config folder structure, will be used instead of the `parent`
 The files here are excluded from this GIT repo.
 It is advised that you create a git sub-module here, so you can commit yor custom configs, and not loose them!
 
+#### Custom bootstrap.sh
+
+Lets say there is something you would like to adjust in the main startup of the magento docker instance.
+Example, this could be a modified nginx config file, or you would like to install some package that you use.
+So, rather than having to build your own docker image, you can place a custom bootstrap.sh file located in ```provision``` folder.
+If that exists, it will be run, as root, on the magento docker instance (only)
+Handy for developers who want to tweak a thing or two.
 
 ### Debugging startup
 
