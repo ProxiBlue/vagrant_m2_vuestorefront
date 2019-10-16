@@ -71,7 +71,7 @@ RUN useradd -G www-data --create-home --shell /bin/bash vagrant && \
         yarn \
         apt-transport-https \
         imagemagick \
-        gettext-base && \
+        gettext-base \
         mysql-client && \
     phpenmod xdebug && \
     echo 'kernel.unprivileged_userns_clone=1' > /etc/sysctl.d/00-local-userns.conf && \

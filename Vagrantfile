@@ -8,11 +8,14 @@ r = Random.new
 ssh_port = r.rand(1000...5000)
 vagrant_root = File.dirname(__FILE__)
 dev_domain = ENV['DEV_DOMAIN'] || raise('You need to define a local DEV_DOMAIN environment variable!')
+mysql_password = ENV['MYSQL_ROOT_PASSWORD'] || raise('You need to define a local MYSQL_ROOT_PASSWORD environment variable to set the mysql password.')
 mode = ENV['VAGRANT_MODE'] || 'dev'
 
 puts "========================================================"
-puts "base domain : #{dev_domain}"
+puts "domain : #{dev_domain}"
 puts "folder : #{vagrant_root}"
+puts "mysql root password : #{mysql_password}"
+puts "mode: #{mode}"
 puts "========================================================"
 
 Vagrant.configure('2') do |config|
@@ -34,7 +37,7 @@ Vagrant.configure('2') do |config|
         magento.vm.network :private_network, ip: "172.20.0.200", subnet: "172.20.0.0/16"
         magento.vm.hostname = "magento"
         magento.vm.provider 'docker' do |d|
-            d.image = "enjo/magento2:latest"
+            d.image = "proxiblue/magento2:latest"
             #d.build_dir = "./Docker/magento"
             d.has_ssh = true
             d.name = "magento"
@@ -47,20 +50,19 @@ Vagrant.configure('2') do |config|
 
     config.vm.define "mysql", primary: false do |mysql|
         mysql.vm.network :private_network, ip: "172.20.0.300", subnet: "172.20.0.0/16"
-        mysql.vm.hostname = "redis"
-        mysql.ssh.keys_only = false
+        mysql.vm.hostname = "mysql"
         mysql.vm.provider 'docker' do |d|
-            d.image = "redis:latest"
+            d.image = "mysql:5.6"
             d.has_ssh = false
             d.name = "mysql"
             d.remains_running = true
+            d.env = { "MYSQL_ROOT_PASSWORD" => "#{mysql_password}" }
         end
     end
 
     config.vm.define "redis", primary: false do |redis|
         redis.vm.network :private_network, ip: "172.20.0.201", subnet: "172.20.0.0/16"
         redis.vm.hostname = "redis"
-        redis.ssh.keys_only = false
         redis.vm.provider 'docker' do |d|
             d.image = "redis:latest"
             d.has_ssh = false

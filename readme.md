@@ -1,4 +1,8 @@
-# Magento 2 Vagrant + Docker [ Vue Store Front - WIP ] development environment
+# Magento 2 Vagrant + Docker [ Vue Store Front ] development environment
+
+## A Work in Progress 
+
+This is a local development environment, to make working with magento 2 and vueStorefront a bit easier to get up and running, in a repeatable, self contained environment.
 
 ## Requirements
 
@@ -8,15 +12,34 @@
 
 ## Layout / Structure
 
-The environment starts up 4 Docker instances, each being a self contained part of the needed environment required to run magento 2
-Each is assigned a fixed IP
+The environment starts up multiple Docker instances, for magento 2 and vueStorefront, with known fixed ips
 
-* magento : 172.20.0.200 : exposes ports 80, 443, 9000
-* redis : 172.20.0.201 : exposes ports 6379
-* elasticsearch : 172.20.0.202 : exposes ports 9200
+* magento : 172.20.0.200 
+* redis : 172.20.0.201 
+* elasticsearchm2 : 172.20.0.202
 * rabbitmq : 172.20.0.203
+* mysql : 172.20.0.300
+* elasticsearch : 172.20.0.204
+* kibana : 172.20.0.205
+* vueapi : 172.20.0.206
+* vuestorefront : 172.20.0.207 
 
-Only the magento instance is SSH capable, nad is the primary instance
+## Quick Start
+
+* clone this repo ```git clone https://github.com/ProxiBlue/vagrant_m2_vuestorefront.git```
+* set a local dev domain: ```export DEV_DOMAIN=<DOMAIN YOU WANT TO USE>```
+* set var that is mysql root password: ```export MYSQL_ROOT_PASSWORD=<MYSQL PASSWORD YOU WANT TO USE>```
+* cd into the cloned repo: ```cd vagrant_m2_vuestorefront```
+* create folder: ```mkdir sites```
+* cd into: ```cd sites```
+* clone: ```git clone https://github.com/DivanteLtd/vue-storefront.git vue-storefront```
+* clone: ```git clone https://github.com/DivanteLtd/vue-storefront-api.git vue-storefront-api```
+* create folder: ```mkdir magento2```
+
+
+
+
+Only the magento instance is SSH capable, and is the primary instance
 running ```vagrant ssh``` will enter the magento instance
 
 The magento source code is expected to reside in the ```[base folder of this environment]\sites\magento2``` folder 
