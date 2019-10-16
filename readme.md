@@ -1,4 +1,4 @@
-# Magento 2 Vagrant + Docker [ Vue Store Front ] development environment
+# Vagrant vueStoreFront + Magento 2 (using Docker) development environment
 
 ## A Work in Progress 
 
