@@ -1,4 +1,5 @@
 .idea
 .vagrant
 sites
-vuestorefront-config-overlay
+vuestorefront-config-overlay/*
+storage

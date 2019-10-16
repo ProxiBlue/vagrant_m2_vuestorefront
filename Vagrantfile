@@ -8,7 +8,8 @@ r = Random.new
 ssh_port = r.rand(1000...5000)
 vagrant_root = File.dirname(__FILE__)
 dev_domain = ENV['DEV_DOMAIN'] || raise('You need to define a local DEV_DOMAIN environment variable!')
-mysql_password = ENV['MYSQL_ROOT_PASSWORD'] || raise('You need to define a local MYSQL_ROOT_PASSWORD environment variable to set the mysql password.')
+mysql_password = ENV['MYSQL_ROOT_PASSWORD'] || "root"
+database_persistent_storage = ENV['DATABASE_PERSISTENT_STORAGE'] || raise('You need to define absolute path for database persistent storage. Path must exist.')
 mode = ENV['VAGRANT_MODE'] || 'dev'
 
 puts "========================================================"
@@ -16,7 +17,10 @@ puts "domain : #{dev_domain}"
 puts "folder : #{vagrant_root}"
 puts "mysql root password : #{mysql_password}"
 puts "mode: #{mode}"
+puts "database persistent storage: #{database_persistent_storage}"
 puts "========================================================"
+
+FileUtils.mkdir_p(database_persistent_storage)
 
 Vagrant.configure('2') do |config|
     config.vm.boot_timeout = 1800
@@ -48,14 +52,16 @@ Vagrant.configure('2') do |config|
         end
     end
 
-    config.vm.define "mysql", primary: false do |mysql|
-        mysql.vm.network :private_network, ip: "172.20.0.300", subnet: "172.20.0.0/16"
-        mysql.vm.hostname = "mysql"
-        mysql.vm.provider 'docker' do |d|
-            d.image = "mysql:5.6"
+    config.vm.define "database", primary: false do |database|
+        database.hostmanager.aliases = [ "database."+dev_domain ]
+        database.vm.network :private_network, ip: "172.20.0.208", subnet: "172.20.0.0/16"
+        database.vm.hostname = "database"
+        database.vm.provider 'docker' do |d|
+            d.image = "mysql:5.7"
             d.has_ssh = false
-            d.name = "mysql"
+            d.name = "database"
             d.remains_running = true
+            d.volumes = ["#{database_persistent_storage}:/var/lib/mysql"]
             d.env = { "MYSQL_ROOT_PASSWORD" => "#{mysql_password}" }
         end
     end
