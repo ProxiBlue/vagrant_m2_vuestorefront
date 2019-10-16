@@ -125,10 +125,10 @@ you can now enter the environment using : ```vagrant ssh``` (this will be the ma
 
 ### Update docker image of specific Docker instance
 
-* run on host : ```vagrant stop [magento|redis|elasticsearch|rabbitmq]```
-* run in host : ```vagrant destroy [magento|redis|elasticsearch|rabbitmq]```
-* run on host : ```docker rmi $(docker images |grep [magento|redis|elasticsearch|rabbitmq] | awk '{print $3}')```
-* run on host : ```vagrant up [magento|redis|elasticsearch|rabbitmq]```
+* run on host : ```vagrant stop [magento|redis|elasticsearchm2|rabbitmq|elasticsearch|vueapi|vuestorefront]```
+* run in host : ```vagrant destroy [magento|redis|elasticsearchm2|rabbitmq|elasticsearch|vueapi|vuestorefront]```
+* run on host : ```docker rmi $(docker images |grep [magento|redis|elasticsearchm2|rabbitmq|elasticsearch|vueapi|vuestorefront] | awk '{print $3}')```
+* run on host : ```vagrant up [magento|redis|elasticsearchm2|rabbitmq|elasticsearch|vueapi|vuestorefront]```
 
 ### Migrate old dev environment over:
 
@@ -226,3 +226,5 @@ REMEMBER: If you edit the local.json configs, for either service, you need to re
 
 ```vagrant halt vueapi && vagrant halt vuestorefront && vagrant up vueapi && vagrant up vuestorefront```
 
+The vueStoreront parts build the exact same Docker images, as supplied by them. The initial startup will thus be slightly slower, giving those once to build.
+reUsing their docker builds shoudl produced greater ongoing compatibility, with ongoing features implemented to those.
