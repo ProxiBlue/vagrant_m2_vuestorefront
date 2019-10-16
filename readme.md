@@ -152,7 +152,7 @@ Now you can run all the same commands, but the initial up will build the docker 
 
 You HOST user .ssh folder is mounted within the magento Docker box under /home/vagrant/.ssh (vagrant is your default 
 user inside the Docker environment)
-This allow you to ssh from within the vagrant environment to any external resources, as all yoru keys are available, 
+This allow you to ssh from within the vagrant environment to any external resources, as all your keys are available, 
 including your hosts config file.
 
 #### GUI applications
@@ -167,7 +167,7 @@ try for example:
 
 #### Composer auth / config
 
-Your HOST ~/.composer/ folder is mounted within the magento Docker box. Thsi allows you to place coposer auth.json 
+Your HOST ~/.composer/ folder is mounted within the magento Docker box. This allows you to place composer auth.json 
 in your usual home folder on the HOST, and that authentication file will be used with composer in the Docker environment
 
 #### ngrok (expose dev instance to external)
@@ -191,13 +191,11 @@ You can access ngrok admin port on 172.20.0.200:4040
 
 #### The config overlay folder
 
-Since you require custom config for vue, you can place the appropriate local.json config files in the folder ```vuestorefront-config-overlay```, ensuring
-the path matches that of the parent config.
+Since you require custom config for vueStoreFront, you can place the appropriate local.json config files in the folder ```vuestorefront-config-overlay```, ensuring the path matches that of the parent config.
 
 Example:
 
-To configure a local.json for vue-storefront-api, which has its config located now in ```sites/vue-storefront-api/config/default.json``` place your local.json file
-in ```vuestorefront-config-overlay/vue-storefront-api/config/local.json```
+To configure a local.json for vue-storefront-api, which has its config located now in ```sites/vue-storefront-api/config/default.json``` place your local.json file in ```vuestorefront-config-overlay/vue-storefront-api/config/local.json```
 
 Basically, and files placed in the overlay folder, matching the `parent` config folder structure, will be used instead of the `parent`
 The files here are excluded from this GIT repo.
@@ -218,10 +216,12 @@ within that docker instance.
 
 Do:
 
-* ```docker ps -a``` to get the instacne id of the problematic instance
-* ```docker logs <INSTANCE ID>``` to get the output of that instance startup console, which can help debug the issue
+* ```docker ps -a``` to get the instance id of the problematic instance
+* ```docker logs -f <INSTANCE ID>``` to get the output of that instance startup console, which can help debug the issue
 
 REMEMBER: If you edit the local.json configs, for either service, you need to restart instances!
+
+### Editing vueStoreFront Configs
 
 ```vagrant halt vueapi && vagrant halt vuestorefront && vagrant up vueapi && vagrant up vuestorefront```
 
