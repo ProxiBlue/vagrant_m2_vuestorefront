@@ -93,7 +93,6 @@ The magento source code is expected to reside in the ```[base folder of this env
 ### Fetch environment
 
 * Clone this repo to your local machine
-* run on host : ```sudo echo "172.20.0.200 magento.enjo.test >> /etc/hosts"```
 
 All other commands are expected to be run from within this cloned folder
 
