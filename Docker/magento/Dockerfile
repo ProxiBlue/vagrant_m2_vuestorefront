@@ -104,9 +104,9 @@ export CD_VERSION=$(wget -qO- https://chromedriver.storage.googleapis.com/LATEST
 
 ADD common/generate_config /tmp/
 RUN bash /tmp/generate_config > /opt/selenium/config.json && \
-/usr/bin/wget -q --no-verbose --no-check-certificate https://files.magerun.net/n98-magerun.phar && \
- /bin/chmod +x ./n98-magerun.phar && \
- mv ./n98-magerun.phar /usr/local/bin/n98-magerun && \
+/usr/bin/wget -q --no-verbose --no-check-certificate https://files.magerun.net/n98-magerun2.phar && \
+ /bin/chmod +x ./n98-magerun2.phar && \
+ mv ./n98-magerun2.phar /usr/local/bin/n98-magerun && \
   /usr/bin/php -r "readfile('https://getcomposer.org/installer');" | /usr/bin/php && \
    /bin/chmod a+rwx composer.phar && mv composer.phar /usr/local/bin/composer
 

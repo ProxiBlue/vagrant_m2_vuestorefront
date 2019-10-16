@@ -33,6 +33,13 @@ Vagrant.configure('2') do |config|
         magento.hostmanager.aliases = [ "magento."+dev_domain ]
         magento.vm.provision "shell" do |s|
             s.path = "bootstrap.sh"
+            s.args = "#{dev_domain}"
+        end
+        if File.exist?("provision/bootstrap.sh")
+            magento.vm.provision "shell" do |s|
+                s.path = "provision/bootstrap.sh"
+                s.args = "#{dev_domain}"
+            end
         end
         magento.ssh.username = "vagrant"
         magento.ssh.password = "vagrant"
