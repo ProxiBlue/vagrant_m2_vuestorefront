@@ -1,12 +1,9 @@
 # Vagrant vueStoreFront + Magento 2 (using Docker) development environment
-
-## A Work in Progress 
-
+ 
 This is a local development environment, to make working with magento 2 and vueStorefront a bit easier to get up and running, in a repeatable, self contained environment.
 
 * NOTE: This was done on Linux, using Debian based distro, and uses Docker as the VM engine. 
 * Some parts *may* be Linux specific (like linking in the home user .ssh folder for ssh-keys)
-* It is still very much a work in progress. Lots more to do.
 * example startup: https://asciinema.org/a/AG8w9J4gCcqMmyTws3GX5qQyx
 
 ## Requirements
