@@ -211,7 +211,8 @@ Vagrant.configure('2') do |config|
             d.create_args = [
                             "--add-host=magento:172.20.0.200",
                             "--add-host=elasticsearch:172.20.0.204",
-                            "--add-host=vuestorefront:172.20.0.207"
+                            "--add-host=vuestorefront:172.20.0.207",
+                            "--add-host=magento.#{dev_domain}:172.20.0.200"
                             ]
         end
     end
@@ -268,6 +269,7 @@ Vagrant.configure('2') do |config|
                             "--add-host=magento:172.20.0.200",
                             "--add-host=elasticsearch:172.20.0.204",
                             "--add-host=vueapi:172.20.0.206",
+                            "--add-host=magento.#{dev_domain}:172.20.0.200"
                             ]
         end
     end

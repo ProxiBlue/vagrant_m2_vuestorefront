@@ -116,11 +116,11 @@ you can now enter the environment using : ```vagrant ssh``` (this will be the ma
 
 ### Halt specific Docker instance
 
-* run on host : ```vagrant halt [magento|redis|elasticsearch|rabbitmq]```
+* run on host : ```vagrant halt [magento|redis|elasticsearchm2|rabbitmq|elasticsearch|vueapi|vuestorefront]```
 
 ### Start specific Docker instance
 
-* run on host : ```vagrant start [magento|redis|elasticsearch|rabbitmq]```
+* run on host : ```vagrant start [magento|redis|elasticsearchm2|rabbitmq|elasticsearch|vueapi|vuestorefront]```
 
 ### Update docker image of specific Docker instance
 
@@ -154,6 +154,13 @@ You HOST user .ssh folder is mounted within the magento Docker box under /home/v
 user inside the Docker environment)
 This allow you to ssh from within the vagrant environment to any external resources, as all your keys are available, 
 including your hosts config file.
+
+Although none of the other docker instances has SSH, you can easily drop into a shell to do stuff inside the containers:
+
+```docker exec -it vueapi /bin/sh```
+
+will give you a shell session inside the vueapi docker instance
+
 
 #### GUI applications
 
@@ -209,6 +216,15 @@ So, rather than having to build your own docker image, you can place a custom bo
 If that exists, it will be run, as root, on the magento docker instance (only)
 Handy for developers who want to tweak a thing or two.
 
+### Editing vueStoreFront Configs
+
+```vagrant halt vueapi && vagrant halt vuestorefront && vagrant up vueapi && vagrant up vuestorefront```
+
+The vueStoreront parts build the exact same Docker images, as supplied by them. The initial startup will thus be slightly slower, giving those once to build.
+reUsing their docker builds shoudl produced greater ongoing compatibility, with ongoing features implemented to those.
+
+REMEMBER: If you edit the local.json configs, for either service, you need to restart instances!
+
 ### Debugging startup
 
 If you find that one of the docker instacnes is not persisting, it is likely there is a startup issue with the packages
@@ -216,14 +232,38 @@ within that docker instance.
 
 Do:
 
-* ```docker ps -a``` to get the instance id of the problematic instance
-* ```docker logs -f <INSTANCE ID>``` to get the output of that instance startup console, which can help debug the issue
+* ```docker logs -f [vuestorefront|vueapi]``` to get the output of that instance startup console, which can help debug the issue
 
-REMEMBER: If you edit the local.json configs, for either service, you need to restart instances!
+Example:
 
-### Editing vueStoreFront Configs
+* Accessing the storefront on url: http://vuestorefront:3000/ I get 500 internal server error (something went wrong)
+* To figure out, I tail the log on vuestorefront using ```docker logs -f vuestorefront```
+
+In that tail, I see:
+
+```
+Error: request to http://localhost:8080/api/catalog/vue_storefront_magento_default/product/_search?_source_exclude=%2A.msrp_display_actual_price_type%2Crequired_options%2Cupdated_at%2Ccreated_at%2Cattribute_set_id%2Coptions_container%2Cmsrp_display_actual_price_type%2Chas_options%2Cstock.manage_stock%2Cstock.use_config_min_qty%2Cstock.use_config_notify_stock_qty%2Cstock.stock_id%2Cstock.use_config_backorders%2Cstock.use_config_enable_qty_inc%2Cstock.enable_qty_increments%2Cstock.use_config_manage_stock%2Cstock.use_config_min_sale_qty%2Cstock.notify_stock_qty%2Cstock.use_config_max_sale_qty%2Cstock.use_config_max_sale_qty%2Cstock.qty_increments%2Csmall_image%2Csgn%2C%2A.sgn&from=0&request=%7B%22query%22%3A%7B%22bool%22%3A%7B%22filter%22%3A%7B%22bool%22%3A%7B%22must%22%3A%5B%7B%22terms%22%3A%7B%22category.name.keyword%22%3A%5B%22Tees%22%5D%7D%7D%2C%7B%22terms%22%3A%7B%22visibility%22%3A%5B2%2C3%2C4%5D%7D%7D%2C%7B%22terms%22%3A%7B%22status%22%3A%5B0%2C1%5D%7D%7D%5D%7D%7D%7D%7D%7D&size=8&sort=created_at%3Adesc failed, reason: connect ECONNREFUSED 127.0.0.1:8080
+
+```
+
+which clearly points to having incorrectly configured the connection to the API in vuestorefront local.json
+
+```
+    "api": {
+      "url": "http://localhost:8080"
+    },
+```
+
+should be
+
+```
+    "api": {
+      "url": "http://vueapi:8080"
+    },
+```
+
+and then I run 
 
 ```vagrant halt vueapi && vagrant halt vuestorefront && vagrant up vueapi && vagrant up vuestorefront```
 
-The vueStoreront parts build the exact same Docker images, as supplied by them. The initial startup will thus be slightly slower, giving those once to build.
-reUsing their docker builds shoudl produced greater ongoing compatibility, with ongoing features implemented to those.
+to get that change reloaded
