@@ -273,4 +273,21 @@ Vagrant.configure('2') do |config|
                             ]
         end
     end
+
+    config.vm.define "reverseproxy", primary: false do |reverseproxy|
+        database.hostmanager.aliases = [ "reverseproxy."+dev_domain ]
+        database.vm.network :private_network, ip: "172.20.0.210", subnet: "172.20.0.0/16"
+        database.vm.hostname = "reverseproxy"
+        database.vm.provider 'docker' do |d|
+            d.image = "nginx:latest"
+            d.has_ssh = false
+            d.name = "reverseproxy"
+            d.remains_running = true
+            d.volumes = [
+                "#{database_persistent_storage}:/etc/nginx",
+                ":/etc/ssl/private"
+            ]
+
+        end
+    end
 end
