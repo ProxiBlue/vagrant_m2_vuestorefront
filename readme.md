@@ -38,7 +38,7 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
 * clone: ```git clone https://github.com/DivanteLtd/vue-storefront-api.git vue-storefront-api```
 * create folder: ```mkdir magento2```
 * bring up the magento instance: ```vagrant up magento``` (ignore error: The SSH command responded with a non-zero exit status)
-* cd into folder magento2, and install magento files (any way you like) example: ```composer create-project --repository=https://repo.magento.com/ magento/project-community-edition ./``` 
+* ssh into instance ```vagrant ssh```, and install magento files (any way you like) example: ```composer create-project --repository=https://repo.magento.com/ magento/project-community-edition ./``` 
 * bring up the database instance: ```vagrant up database```
 * access instance, and create db: ```vagrant ssh``` then ```mysqladmin -u root -h database -p  create magento```
 * browse to ```https://magento.<THE DEV DOMAIN YOU USE>``` and install magento 2. The database server will be ```database.<YOUR DOMAIN>```
