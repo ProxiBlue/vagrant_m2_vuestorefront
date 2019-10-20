@@ -8,7 +8,7 @@ This is a local development environment, to make working with magento 2 and vueS
 
 ## Requirements
 
-* Vagrant 2.2.5 or greater
+* Vagrant 2.2.5 or greater (important, will not work with older vagrant versions)
 * Docker 18.09.7 or greater
 * vagrant plugin: https://github.com/devopsgroup-io/vagrant-hostmanager
 
@@ -52,6 +52,7 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
     * you want to stop here: ```yarn mage2vs import``` - you only want to do the OAuth keys, not the import, that is the next step!
 * Install https://github.com/DivanteLtd/magento2-vsbridge-indexer
     * ```vagrant ssh```
+    * ```composer require divante/magento2-vsbridge-indexer```
     * ```composer require divante/magento2-vsbridge-indexer-msi:0.1.0```    
     * configure as per their guide, and re-index.
 * Edit the rest of vueStorefront configs, and set according to YOUR needs
@@ -264,3 +265,12 @@ and then I run
 ```vagrant halt vueapi && vagrant halt vuestorefront && vagrant up vueapi && vagrant up vuestorefront```
 
 to get that change reloaded
+
+### Docker instances are not getting assigned teh new private ip ranges
+
+You have started everything up, but there is no networking between the HOST and teh docker instances, or the docker instances cannot communicate.
+
+If you check IP allowcation to the magento docker : ```vagrant ssh``` then ```ifconfig``` shows no ip range of 172.20.x.x was assigned to teh instances
+
+* You need to update vagrant!
+
