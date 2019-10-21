@@ -11,6 +11,15 @@ dev_domain = ENV['DEV_DOMAIN'] || raise('You need to define a local DEV_DOMAIN e
 mysql_password = ENV['MYSQL_ROOT_PASSWORD'] || "root"
 persistent_storage = ENV['PERSISTENT_STORAGE'] || raise('You need to define absolute path for persistent storage. Path will be created.')
 mode = ENV['VAGRANT_MODE'] || 'dev'
+hostfile_args = [   "--add-host=magento:172.20.0.200",
+                    "--add-host=elasticsearch:172.20.0.204",
+                    "--add-host=vueapi:172.20.0.206",
+                    "--add-host=magento.#{dev_domain}:172.20.0.200",
+                    "--add-host=vuestorefront:172.20.0.207"
+                ]
+if File.exist?("#{vagrant_root}/reverseproxy/nginx.conf")
+    hostfile_args.push("--add-host=api.#{dev_domain}:172.20.0.210")
+end
 
 puts "========================================================"
 puts "domain : #{dev_domain}"
@@ -34,7 +43,7 @@ Vagrant.configure('2') do |config|
     config.hostmanager.ignore_private_ip = false
     config.hostmanager.include_offline = false
     config.vm.define "magento", primary: true do |magento|
-        magento.hostmanager.aliases = [ "magento."+dev_domain ]
+        magento.hostmanager.aliases = [ "magento."+dev_domain, "api."+dev_domain ]
         magento.vm.provision "shell" do |s|
             s.path = "bootstrap.sh"
             s.args = "#{dev_domain}"
@@ -164,7 +173,7 @@ Vagrant.configure('2') do |config|
             d.volumes = [
                 "#{vue_kibana_config}:/usr/share/kibana/config:ro"
                 ]
-            d.create_args = [ "--add-host=elasticsearch:172.20.0.204" ]
+            d.create_args = hostfile_args
         end
     end
 
@@ -213,14 +222,10 @@ Vagrant.configure('2') do |config|
                       "ELASTICSEARCH_PORT" => "9200",
                       "REDIS_HOST" => "redis",
                       "VS_ENV" => "#{mode}",
-                      "PM2_ARGS" => "--no-daemon"
+                      "PM2_ARGS" => "--no-daemon",
+                      "NODE_TLS_REJECT_UNAUTHORIZED" => "0"
                     }
-            d.create_args = [
-                            "--add-host=magento:172.20.0.200",
-                            "--add-host=elasticsearch:172.20.0.204",
-                            "--add-host=vuestorefront:172.20.0.207",
-                            "--add-host=magento.#{dev_domain}:172.20.0.200"
-                            ]
+            d.create_args = hostfile_args
         end
     end
 
@@ -270,14 +275,10 @@ Vagrant.configure('2') do |config|
             d.env = { "BIND_HOST" => "0.0.0.0",
                       "NODE_CONFIG_ENV" => "docker",
                       "VS_ENV" => "#{mode}",
-                      "PM2_ARGS" => "--no-daemon"
+                      "PM2_ARGS" => "--no-daemon",
+                      "NODE_TLS_REJECT_UNAUTHORIZED" => "0"
                     }
-            d.create_args = [
-                            "--add-host=magento:172.20.0.200",
-                            "--add-host=elasticsearch:172.20.0.204",
-                            "--add-host=vueapi:172.20.0.206",
-                            "--add-host=magento.#{dev_domain}:172.20.0.200"
-                            ]
+            d.create_args = hostfile_args
         end
     end
 
@@ -295,10 +296,7 @@ Vagrant.configure('2') do |config|
                     "#{vagrant_root}/reverseproxy/nginx.conf:/etc/nginx/nginx.conf:ro",
                     "#{vagrant_root}/Docker/magento/common/nginx/ssl:/etc/nginx/ssl"
                 ]
-                d.create_args = [
-                    "--add-host=vueapi:172.20.0.206",
-                    "--add-host=vuestorefront:172.20.0.207"
-                ]
+                d.create_args = hostfile_args
             end
         end
     end

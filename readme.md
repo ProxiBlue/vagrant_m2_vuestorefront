@@ -25,13 +25,16 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
 * kibana : 172.20.0.205
 * vueapi : 172.20.0.206
 * vuestorefront : 172.20.0.207 
-* reverseproxy : 172.20.0.210
+* reverseproxy : 172.20.0.210 (conditional, see section about Reverse Proxy) 
 
 ## Quick(ish) Start
 
 * clone this repo ```git clone https://github.com/ProxiBlue/vagrant_m2_vuestorefront.git```
 * set a local dev domain: ```export DEV_DOMAIN=<DOMAIN YOU WANT TO USE>```
 * set path to persistent storage (path must exist): ```export PERSISTENT_STORAGE=<ABSOLUTE PATH>```
+    * Persistent storage is currently used for:
+        * Mysql Database storage
+        * Elasticsearch storage (both vueSF + Magento 2)
 * cd into the cloned repo: ```cd vagrant_m2_vuestorefront```
 * create folder: ```mkdir sites```
 * cd into: ```cd sites```
@@ -63,6 +66,9 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
         * vueStorefront api host: ```vueapi```
         * magento host: ```magento.<YOUR DOMAIN>``` (you must use the FQDN for magento, else magento will redirect)
         * vueStorefront : ```vuestorefront```
+    * You can also use the FQDN with your set dev domain for any of the above    
+    * If you have activated the reverse proxy, you can use api.<YOUR DEV DOMAIN> for all hosts, as they will go via teh proxy.
+       
 * bring the entire environment down, then back up: ```exit``` && ```vagrant halt``` && ```vagrant up```
 * wait a moment for vuestorefront to start. you can follow the progress using : ```docker logs -f vuestorefront``` (NOTE: this is also the best way to debug, as you will get pointed errors noted inthe console. Example, connection errors)
 
@@ -131,22 +137,22 @@ you can now enter the environment using : ```vagrant ssh``` (this will be the ma
 
 ### Halt specific Docker instance
 
-* run on host : ```vagrant halt [magento|redis|elasticsearchm2|rabbitmq|elasticsearch|vueapi|vuestorefront]```
+* run on host : ```vagrant halt [magento|redis|elasticsearchm2|rabbitmq|elasticsearch|vueapi|vuestorefront|reverseproxy]```
 
 ### Start specific Docker instance
 
-* run on host : ```vagrant start [magento|redis|elasticsearchm2|rabbitmq|elasticsearch|vueapi|vuestorefront]```
+* run on host : ```vagrant start [magento|redis|elasticsearchm2|rabbitmq|elasticsearch|vueapi|vuestorefront|reverseproxy]```
 
 ### Update docker image of specific Docker instance
 
-* run on host : ```vagrant stop [magento|redis|elasticsearchm2|rabbitmq|elasticsearch|vueapi|vuestorefront]```
-* run in host : ```vagrant destroy [magento|redis|elasticsearchm2|rabbitmq|elasticsearch|vueapi|vuestorefront]```
-* run on host : ```docker rmi $(docker images |grep [magento|redis|elasticsearchm2|rabbitmq|elasticsearch|vueapi|vuestorefront] | awk '{print $3}')```
-* run on host : ```vagrant up [magento|redis|elasticsearchm2|rabbitmq|elasticsearch|vueapi|vuestorefront]```
+* run on host : ```vagrant stop [magento|redis|elasticsearchm2|rabbitmq|elasticsearch|vueapi|vuestorefront|reverseproxy]```
+* run in host : ```vagrant destroy [magento|redis|elasticsearchm2|rabbitmq|elasticsearch|vueapi|vuestorefront|reverseproxy]```
+* run on host : ```docker rmi $(docker images |grep [magento|redis|elasticsearchm2|rabbitmq|elasticsearch|vueapi|vuestorefront|reverseproxy] | awk '{print $3}')```
+* run on host : ```vagrant up [magento|redis|elasticsearchm2|rabbitmq|elasticsearch|vueapi|vuestorefront|reverseproxy]```
 
 ### Migrate old dev environment over:
 
-* copy the entire folder from ```[old environment]/sites/m2``` to ```[new environment]\sites\magento2```
+* copy the entire folder from ```[old environment]/sites/m2``` to ```[new environment]/sites/magento2```
 
 example being inside new environment folder: ```cp -xav ~/workspace/vagrant/sites/m2 ./sites/magento```
 
@@ -240,6 +246,37 @@ reUsing their docker builds shoudl produced greater ongoing compatibility, with 
 
 REMEMBER: If you edit the local.json configs, for either service, you need to restart instances!
 
+### a Reverse Proxy
+
+Imagine you have a multistore setup. YEs, you can access the multipe stores via http://vuestorefront:3000/<STORE>, but that is hardly ideal.
+You would want to access each store via a proper URL. Example store.example.com, store2.example.com etc
+
+For this, you can create an nginx config file that you place in the reverseproxy folder. If that nginz.conf exists, an nginx instance on ip 172.20.0.210 will be brought up, and run that given nginx file
+The domain ```api.<YOUR DEV DOMAIN``` will be placed into all guest machines, and your host. You can use the api.<dev_domain> address to set all connections to inthe local.json files
+
+Example: 
+
+```
+"elasticsearch": {
+    "host": "https://api.dev.proxiblue.com.au/api/catalog",
+    "index": "vue_storefront_magento_default"
+},
+
+```
+
+#### SSL certificate
+
+* I found this tool to allow creation of self-signed, but 'trusted' self certs: https://github.com/FiloSottile/mkcert
+* Install this tool, and generate a new self signed cert for your dev domain
+
+The run:
+
+* ```mkcert -install```
+* ```mkcert <YOUR DEV DOMAIN>```
+
+You will be given 2 x .pem file, one for the cert, the other for the key. Copy them into the ```reverseproxy``` folder.
+
+
 ### Debugging startup
 
 If you find that one of the docker instacnes is not persisting, it is likely there is a startup issue with the packages
@@ -283,11 +320,12 @@ and then I run
 
 to get that change reloaded
 
-### Docker instances are not getting assigned teh new private ip ranges
+### Docker instances are not getting assigned the new private ip ranges
 
-You have started everything up, but there is no networking between the HOST and teh docker instances, or the docker instances cannot communicate.
+You have started everything up, but there is no networking between the HOST and the docker instances, or the docker instances cannot communicate.
 
-If you check IP allowcation to the magento docker : ```vagrant ssh``` then ```ifconfig``` shows no ip range of 172.20.x.x was assigned to teh instances
+If you check IP allocation to the magento docker : ```vagrant ssh``` then ```ifconfig``` shows no ip range of 172.20.x.x was assigned to the instances
 
 * You need to update vagrant!
+
 
