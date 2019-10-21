@@ -21,19 +21,20 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
 
 * magento : 172.20.0.200 
 * redis : 172.20.0.201 
-* elasticsearchm2 : 172.20.0.202
-* rabbitmq : 172.20.0.203
-* database : 172.20.0.208
+* elasticsearchm2 : 172.20.0.202 (for use in m2)
+* rabbitmq : 172.20.0.203 (for use in m2)
+* database : 172.20.0.208 (for use in m2)
 * elasticsearch : 172.20.0.204
 * kibana : 172.20.0.205
 * vueapi : 172.20.0.206
 * vuestorefront : 172.20.0.207 
+* reverseproxy : 172.20.0.210
 
 ## Quick(ish) Start
 
 * clone this repo ```git clone https://github.com/ProxiBlue/vagrant_m2_vuestorefront.git```
 * set a local dev domain: ```export DEV_DOMAIN=<DOMAIN YOU WANT TO USE>```
-* set path to database persistent storage (path must exist): ```export DATABASE_PERSISTENT_STORAGE=<ABSOLUTE PATH>```
+* set path to persistent storage (path must exist): ```export PERSISTENT_STORAGE=<ABSOLUTE PATH>```
 * cd into the cloned repo: ```cd vagrant_m2_vuestorefront```
 * create folder: ```mkdir sites```
 * cd into: ```cd sites```
@@ -61,13 +62,13 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
     * Note that you can set the following, in accordance to this environment: 
         * redis host: ```redis```
         * elasticsearch host: ```elasticsearch```
-        * vue storefront api host: ```vueapi```
+        * vueStorefront api host: ```vueapi```
         * magento host: ```magento.<YOUR DOMAIN>``` (you must use the FQDN for magento, else magento will redirect)
-        * vuew storefront : ```vuestorefront```
+        * vueStorefront : ```vuestorefront```
 * bring the entire environment down, then back up: ```exit``` && ```vagrant halt``` && ```vagrant up```
 * wait a moment for vuestorefront to start. you can follow the progress using : ```docker logs -f vuestorefront``` (NOTE: this is also the best way to debug, as you will get pointed errors noted inthe console. Example, connection errors)
 
-Done, you should be able to browse to vuewstorefront using: http://vuestorefront:3000
+Done, you should be able to browse to vueStorefront using: http://vuestorefront:3000
 
 ## Additional things to do
 
@@ -88,6 +89,22 @@ running ```vagrant ssh``` will enter the magento instance
 The magento source code is expected to reside in the ```[base folder of this environment]\sites\magento2``` folder 
 [ HOST ] and inside the Docker instance will be available as /vagrant/sites/magento2
 
+
+### reverse Proxy
+
+Although you can access the vueSF store via the http://vuestorefront:3000 url, this is not always ideal. 
+
+You can place a reverse proxy ```nginx.conf``` file into the folder ```reverseproxy```
+
+If that file exists, an additional docker nginx instance will be brought up, and the supplied config file will be used.
+You can ref the self signed cert, or place your own cert files withing the vagrant folder, to use SSL
+
+There is an example ```nginx.conf.dist``` file that shows reverse proxy for 2 sites
+
+You need to place the domains in your HOST machine host file, using teh IP 172.20.0.210. 
+
+Example: ```172.20.0.210 site1.dev.proxiblue.com.au site2.dev.proxiblue.com.au```
+
 ## Other stuff
 
 ### Fetch environment
@@ -102,7 +119,7 @@ All other commands are expected to be run from within this cloned folder
 
 * DEV_DOMAIN : The domain that vagrant instances will use
 * MYSQL_ROOT_PASSWORD :  password to use as root for database (optional - defaults to: root)
-* DATABASE_PERSISTENT_STORAGE : Path on your HOST where database will save for persistence.
+* PERSISTENT_STORAGE : Path on your HOST where data will save for persistence. example mysql, elaticsearch
 
 Suggest you place these into your user profile startup. (```~/bashrc```)
 

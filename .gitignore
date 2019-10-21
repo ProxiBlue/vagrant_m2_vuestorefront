@@ -2,5 +2,6 @@
 .vagrant
 sites
 vuestorefront-config-overlay/*
-storage
 custom/*
+reverseproxy/*
+

@@ -9,7 +9,7 @@ ssh_port = r.rand(1000...5000)
 vagrant_root = File.dirname(__FILE__)
 dev_domain = ENV['DEV_DOMAIN'] || raise('You need to define a local DEV_DOMAIN environment variable!')
 mysql_password = ENV['MYSQL_ROOT_PASSWORD'] || "root"
-database_persistent_storage = ENV['DATABASE_PERSISTENT_STORAGE'] || raise('You need to define absolute path for database persistent storage. Path must exist.')
+persistent_storage = ENV['PERSISTENT_STORAGE'] || raise('You need to define absolute path for persistent storage. Path will be created.')
 mode = ENV['VAGRANT_MODE'] || 'dev'
 
 puts "========================================================"
@@ -17,10 +17,14 @@ puts "domain : #{dev_domain}"
 puts "folder : #{vagrant_root}"
 puts "mysql root password : #{mysql_password}"
 puts "mode: #{mode}"
-puts "database persistent storage: #{database_persistent_storage}"
+puts "persistent storage: #{persistent_storage}"
 puts "========================================================"
 
-FileUtils.mkdir_p(database_persistent_storage)
+FileUtils.mkdir_p(persistent_storage)
+FileUtils.mkdir_p(persistent_storage+"/mysql")
+FileUtils.mkdir_p(persistent_storage+"/elasticsearchm2")
+FileUtils.mkdir_p(persistent_storage+"/elasticsearch")
+
 
 Vagrant.configure('2') do |config|
     config.vm.boot_timeout = 1800
@@ -68,7 +72,7 @@ Vagrant.configure('2') do |config|
             d.has_ssh = false
             d.name = "database"
             d.remains_running = true
-            d.volumes = ["#{database_persistent_storage}:/var/lib/mysql"]
+            d.volumes = ["#{persistent_storage}/mysql:/var/lib/mysql"]
             d.env = { "MYSQL_ROOT_PASSWORD" => "#{mysql_password}" }
         end
     end
@@ -93,6 +97,9 @@ Vagrant.configure('2') do |config|
             d.has_ssh = false
             d.name = "elasticsearchm2"
             d.remains_running = true
+            d.volumes = [
+                "#{persistent_storage}/elasticsearchm2:/usr/share/elasticsearch/data"
+            ]
         end
     end
 
@@ -129,7 +136,7 @@ Vagrant.configure('2') do |config|
             d.remains_running = true
             d.volumes = [
                 "#{vue_elastic_config}:/usr/share/elasticsearch/config/elasticsearch.yml:ro",
-                "#{vagrant_root}/sites/vue-storefront-api/docker/elasticsearch/data:/usr/share/elasticsearch/data"
+                "#{persistent_storage}/elasticsearch:/usr/share/elasticsearch/data"
                 ]
             d.env =  { "ES_JAVA_OPTS" => "-Xmx512m -Xms512m" }
         end
@@ -274,20 +281,25 @@ Vagrant.configure('2') do |config|
         end
     end
 
-    config.vm.define "reverseproxy", primary: false do |reverseproxy|
-        database.hostmanager.aliases = [ "reverseproxy."+dev_domain ]
-        database.vm.network :private_network, ip: "172.20.0.210", subnet: "172.20.0.0/16"
-        database.vm.hostname = "reverseproxy"
-        database.vm.provider 'docker' do |d|
-            d.image = "nginx:latest"
-            d.has_ssh = false
-            d.name = "reverseproxy"
-            d.remains_running = true
-            d.volumes = [
-                "#{database_persistent_storage}:/etc/nginx",
-                ":/etc/ssl/private"
-            ]
-
+    if File.exist?("#{vagrant_root}/reverseproxy/nginx.conf")
+        config.vm.define "reverseproxy", primary: false do |reverseproxy|
+            reverseproxy.hostmanager.aliases = [ "reverseproxy."+dev_domain ]
+            reverseproxy.vm.network :private_network, ip: "172.20.0.210", subnet: "172.20.0.0/16"
+            reverseproxy.vm.hostname = "reverseproxy"
+            reverseproxy.vm.provider 'docker' do |d|
+                d.image = "nginx:latest"
+                d.has_ssh = false
+                d.name = "reverseproxy"
+                d.remains_running = true
+                d.volumes = [
+                    "#{vagrant_root}/reverseproxy/nginx.conf:/etc/nginx/nginx.conf:ro",
+                    "#{vagrant_root}/Docker/magento/common/nginx/ssl:/etc/nginx/ssl"
+                ]
+                d.create_args = [
+                    "--add-host=vueapi:172.20.0.206",
+                    "--add-host=vuestorefront:172.20.0.207"
+                ]
+            end
         end
     end
 end
