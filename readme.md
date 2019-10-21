@@ -1,17 +1,14 @@
 # Vagrant vueStoreFront + Magento 2 (using Docker) development environment
-
-## A Work in Progress 
-
+ 
 This is a local development environment, to make working with magento 2 and vueStorefront a bit easier to get up and running, in a repeatable, self contained environment.
 
 * NOTE: This was done on Linux, using Debian based distro, and uses Docker as the VM engine. 
 * Some parts *may* be Linux specific (like linking in the home user .ssh folder for ssh-keys)
-* It is still very much a work in progress. Lots more to do.
 * example startup: https://asciinema.org/a/AG8w9J4gCcqMmyTws3GX5qQyx
 
 ## Requirements
 
-* Vagrant 2.2.5 or greater
+* Vagrant 2.2.5 or greater (important, will not work with older vagrant versions)
 * Docker 18.09.7 or greater
 * vagrant plugin: https://github.com/devopsgroup-io/vagrant-hostmanager
 
@@ -41,10 +38,10 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
 * clone: ```git clone https://github.com/DivanteLtd/vue-storefront.git vue-storefront```
 * clone: ```git clone https://github.com/DivanteLtd/vue-storefront-api.git vue-storefront-api```
 * create folder: ```mkdir magento2```
-* cd into folder magento2, and install magento files (any way you like) example: ```composer create-project --repository=https://repo.magento.com/ magento/project-community-edition ./``` 
 * bring up the database instance: ```vagrant up database```
-* bring up the magento instance: ```vagrant up magento2``` (ignore error: The SSH command responded with a non-zero exit status)
-* access instance, and create db: ```vagrant ssh``` then ```mysqladmin -u root -h database -p  create magento```
+* bring up the magento instance: ```vagrant up magento``` (ignore error: The SSH command responded with a non-zero exit status)
+* ssh into instance ```vagrant ssh```, and install magento files (any way you like) example: ```composer create-project --repository=https://repo.magento.com/ magento/project-community-edition ./``` 
+* then ```mysqladmin -u root -h database -p  create magento```
 * browse to ```https://magento.<THE DEV DOMAIN YOU USE>``` and install magento 2. The database server will be ```database.<YOUR DOMAIN>```
     * you might want to install sample data: https://devdocs.magento.com/guides/v2.3/install-gde/install/cli/install-cli-sample-data.html
 * copy the vue config files to the overlay folder: (these actions are run on the HOST)
@@ -56,6 +53,7 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
     * you want to stop here: ```yarn mage2vs import``` - you only want to do the OAuth keys, not the import, that is the next step!
 * Install https://github.com/DivanteLtd/magento2-vsbridge-indexer
     * ```vagrant ssh```
+    * ```composer require divante/magento2-vsbridge-indexer```
     * ```composer require divante/magento2-vsbridge-indexer-msi:0.1.0```    
     * configure as per their guide, and re-index.
 * Edit the rest of vueStorefront configs, and set according to YOUR needs
@@ -284,3 +282,12 @@ and then I run
 ```vagrant halt vueapi && vagrant halt vuestorefront && vagrant up vueapi && vagrant up vuestorefront```
 
 to get that change reloaded
+
+### Docker instances are not getting assigned teh new private ip ranges
+
+You have started everything up, but there is no networking between the HOST and teh docker instances, or the docker instances cannot communicate.
+
+If you check IP allowcation to the magento docker : ```vagrant ssh``` then ```ifconfig``` shows no ip range of 172.20.x.x was assigned to teh instances
+
+* You need to update vagrant!
+
