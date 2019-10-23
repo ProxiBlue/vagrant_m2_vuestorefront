@@ -77,7 +77,7 @@ Vagrant.configure('2') do |config|
         database.vm.network :private_network, ip: "172.20.0.208", subnet: "172.20.0.0/16"
         database.vm.hostname = "database"
         database.vm.provider 'docker' do |d|
-            d.image = "mysql:5.7"
+            d.image = "proxiblue/mysql:latest"
             d.has_ssh = false
             d.name = "database"
             d.remains_running = true
