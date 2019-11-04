@@ -31,7 +31,7 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
 
 * clone this repo ```git clone https://github.com/ProxiBlue/vagrant_m2_vuestorefront.git```
 * set a local dev domain: ```export DEV_DOMAIN=<DOMAIN YOU WANT TO USE>```
-* set path to persistent storage (path must exist): ```export PERSISTENT_STORAGE=<ABSOLUTE PATH>```
+* set path to persistent storage (path must exist): ```export PERSISTENT_STORAGE=<ABSOLUTE PATH FROM ROOT FOLDER>```
     * Persistent storage is currently used for:
         * Mysql Database storage
         * Elasticsearch storage (both vueSF + Magento 2)
