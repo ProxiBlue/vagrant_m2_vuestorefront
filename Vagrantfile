@@ -11,9 +11,6 @@ dev_domain = ENV['DEV_DOMAIN'] || raise('You need to define a local DEV_DOMAIN e
 mysql_password = ENV['MYSQL_ROOT_PASSWORD'] || "root"
 persistent_storage = ENV['PERSISTENT_STORAGE'] || raise('You need to define absolute path for persistent storage. Path will be created.')
 mode = ENV['VAGRANT_MODE'] || 'dev'
-if File.exist?("#{vagrant_root}/reverseproxy/nginx.conf")
-    hostfile_args.push("--add-host=api.#{dev_domain}:172.20.0.210")
-end
 
 puts "========================================================"
 puts "domain : #{dev_domain}"
@@ -169,7 +166,6 @@ Vagrant.configure('2') do |config|
             d.volumes = [
                 "#{vue_kibana_config}:/usr/share/kibana/config:ro"
                 ]
-            d.create_args = hostfile_args
         end
     end
 

@@ -322,6 +322,12 @@ and then I run
 
 to get that change reloaded
 
+### elasticsearchm2
+
+* vagrant status showed this machine failed to start.
+* docker logs elasticsearchm2 showed "Error: max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]"
+* Ran sysctl -w vm.max_map_count=262144 on host machine to fix
+
 ### Docker instances are not getting assigned the new private ip ranges
 
 You have started everything up, but there is no networking between the HOST and the docker instances, or the docker instances cannot communicate.
