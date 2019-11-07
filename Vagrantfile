@@ -69,8 +69,8 @@ Vagrant.configure('2') do |config|
         database.vm.hostname = "database"
         database.vm.communicator = 'docker'
         database.vm.provider 'docker' do |d|
-            d.image = "mysql:5.7"
-            d.has_ssh = true
+            d.image = "proxiblue/mysql:latest"
+            d.has_ssh = false
             d.name = "database"
             d.remains_running = true
             d.volumes = ["#{persistent_storage}/mysql:/var/lib/mysql"]

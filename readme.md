@@ -33,7 +33,7 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
 
 * clone this repo ```git clone https://github.com/ProxiBlue/vagrant_m2_vuestorefront.git```
 * set a local dev domain: ```export DEV_DOMAIN=<DOMAIN YOU WANT TO USE>```
-* set path to persistent storage (path must exist): ```export PERSISTENT_STORAGE=<ABSOLUTE PATH>```
+* set path to persistent storage (path must exist): ```export PERSISTENT_STORAGE=<ABSOLUTE PATH FROM ROOT FOLDER>```
     * Persistent storage is currently used for:
         * Mysql Database storage
         * Elasticsearch storage (both vueSF + Magento 2)
@@ -47,6 +47,7 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
 * bring up the magento instance: ```vagrant up magento``` (ignore error: The SSH command responded with a non-zero exit status)
 * ssh into instance ```vagrant ssh```, and install magento files (any way you like) example: ```composer create-project --repository=https://repo.magento.com/ magento/project-community-edition ./``` 
 * then ```mysqladmin -u root -h database -p  create magento```
+* then ```exit``` to exit vagrant, and reload ```vagrant reload magento``` (will now start without error)
 * browse to ```https://magento.<THE DEV DOMAIN YOU USE>``` and install magento 2. The database server will be ```database.<YOUR DOMAIN>```
     * you might want to install sample data: https://devdocs.magento.com/guides/v2.3/install-gde/install/cli/install-cli-sample-data.html
 * copy the vue config files to the overlay folder: (these actions are run on the HOST)
