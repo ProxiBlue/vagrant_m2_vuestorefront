@@ -11,12 +11,6 @@ dev_domain = ENV['DEV_DOMAIN'] || raise('You need to define a local DEV_DOMAIN e
 mysql_password = ENV['MYSQL_ROOT_PASSWORD'] || "root"
 persistent_storage = ENV['PERSISTENT_STORAGE'] || raise('You need to define absolute path for persistent storage. Path will be created.')
 mode = ENV['VAGRANT_MODE'] || 'dev'
-hostfile_args = [   "--add-host=magento:172.20.0.200",
-                    "--add-host=elasticsearch:172.20.0.204",
-                    "--add-host=vueapi:172.20.0.206",
-                    "--add-host=magento.#{dev_domain}:172.20.0.200",
-                    "--add-host=vuestorefront:172.20.0.207"
-                ]
 if File.exist?("#{vagrant_root}/reverseproxy/nginx.conf")
     hostfile_args.push("--add-host=api.#{dev_domain}:172.20.0.210")
 end
@@ -76,9 +70,10 @@ Vagrant.configure('2') do |config|
         database.hostmanager.aliases = [ "database."+dev_domain ]
         database.vm.network :private_network, ip: "172.20.0.208", subnet: "172.20.0.0/16"
         database.vm.hostname = "database"
+        database.vm.communicator = 'docker'
         database.vm.provider 'docker' do |d|
             d.image = "mysql:5.7"
-            d.has_ssh = false
+            d.has_ssh = true
             d.name = "database"
             d.remains_running = true
             d.volumes = ["#{persistent_storage}/mysql:/var/lib/mysql"]
@@ -164,10 +159,11 @@ Vagrant.configure('2') do |config|
         end
         kibana.vm.network :private_network, ip: "172.20.0.205", subnet: "172.20.0.0/16"
         kibana.vm.hostname = "kibana"
+        kibana.vm.communicator = 'docker'
         kibana.vm.provider 'docker' do |d|
             d.build_dir = "#{vagrant_root}/sites/vue-storefront-api/docker/kibana"
             d.dockerfile = "Dockerfile"
-            d.has_ssh = false
+            d.has_ssh = true
             d.name = "kibana"
             d.remains_running = true
             d.volumes = [
@@ -198,10 +194,11 @@ Vagrant.configure('2') do |config|
         end
         vueapi.vm.network :private_network, ip: "172.20.0.206", subnet: "172.20.0.0/16"
         vueapi.vm.hostname = "vueapi"
+        vueapi.vm.communicator = 'docker'
         vueapi.vm.provider 'docker' do |d|
             d.build_dir = "#{vagrant_root}/sites/vue-storefront-api/"
             d.dockerfile = "docker/vue-storefront-api/Dockerfile"
-            d.has_ssh = false
+            d.has_ssh = true
             d.name = "vueapi"
             d.remains_running = true
             d.volumes = [
@@ -225,7 +222,6 @@ Vagrant.configure('2') do |config|
                       "PM2_ARGS" => "--no-daemon",
                       "NODE_TLS_REJECT_UNAUTHORIZED" => "0"
                     }
-            d.create_args = hostfile_args
         end
     end
 
@@ -251,10 +247,11 @@ Vagrant.configure('2') do |config|
         end
         vuestorefront.vm.network :private_network, ip: "172.20.0.207", subnet: "172.20.0.0/16"
         vuestorefront.vm.hostname = "vuestorefront"
+        vuestorefront.vm.communicator = 'docker'
         vuestorefront.vm.provider 'docker' do |d|
             d.build_dir = "#{vagrant_root}/sites/vue-storefront/"
             d.dockerfile = "docker/vue-storefront/Dockerfile"
-            d.has_ssh = false
+            d.has_ssh = true
             d.name = "vuestorefront"
             d.remains_running = true
             d.volumes = [
@@ -278,7 +275,6 @@ Vagrant.configure('2') do |config|
                       "PM2_ARGS" => "--no-daemon",
                       "NODE_TLS_REJECT_UNAUTHORIZED" => "0"
                     }
-            d.create_args = hostfile_args
         end
     end
 
@@ -287,16 +283,16 @@ Vagrant.configure('2') do |config|
             reverseproxy.hostmanager.aliases = [ "reverseproxy."+dev_domain ]
             reverseproxy.vm.network :private_network, ip: "172.20.0.210", subnet: "172.20.0.0/16"
             reverseproxy.vm.hostname = "reverseproxy"
+            reverseproxy.vm.communicator = 'docker'
             reverseproxy.vm.provider 'docker' do |d|
                 d.image = "nginx:latest"
-                d.has_ssh = false
+                d.has_ssh = true
                 d.name = "reverseproxy"
                 d.remains_running = true
                 d.volumes = [
                     "#{vagrant_root}/reverseproxy/nginx.conf:/etc/nginx/nginx.conf:ro",
                     "#{vagrant_root}/Docker/magento/common/nginx/ssl:/etc/nginx/ssl"
                 ]
-                d.create_args = hostfile_args
             end
         end
     end

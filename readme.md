@@ -11,6 +11,8 @@ This is a local development environment, to make working with magento 2 and vueS
 * Vagrant 2.2.5 or greater (important, will not work with older vagrant versions)
 * Docker 18.09.7 or greater
 * vagrant plugin: https://github.com/devopsgroup-io/vagrant-hostmanager
+* vagrant plugin: ```vagrant plugin install docker-api```
+* vagrant plugin: https://github.com/ProxiBlue/vagrant-communicator-docker
 
 ## Layout / Structure
 
