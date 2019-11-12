@@ -1,11 +1,9 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 require 'fileutils'
-
+startSSHPort = 2250
 # Generate a random port number
 # fixes issue where two boxes try and map port 22, if you run multiple vagrant environments in one host
-r = Random.new
-ssh_port = r.rand(1000...5000)
 vagrant_root = File.dirname(__FILE__)
 dev_domain = ENV['DEV_DOMAIN'] || raise('You need to define a local DEV_DOMAIN environment variable!')
 mysql_password = ENV['MYSQL_ROOT_PASSWORD'] || "root"
@@ -34,7 +32,7 @@ Vagrant.configure('2') do |config|
     config.hostmanager.ignore_private_ip = false
     config.hostmanager.include_offline = false
     config.vm.define "magento", primary: true do |magento|
-        magento.hostmanager.aliases = [ "magento."+dev_domain, "api."+dev_domain ]
+        magento.hostmanager.aliases = [ "magento."+dev_domain ]
         magento.vm.provision "shell" do |s|
             s.path = "bootstrap.sh"
             s.args = "#{dev_domain}"
@@ -48,8 +46,8 @@ Vagrant.configure('2') do |config|
         magento.ssh.username = "vagrant"
         magento.ssh.password = "vagrant"
         magento.ssh.keys_only = false
-        magento.vm.network "forwarded_port", guest: 22, host: "#{ssh_port}", id: 'ssh', auto_correct: true
         magento.vm.network :private_network, ip: "172.20.0.200", subnet: "172.20.0.0/16"
+        magento.vm.network "forwarded_port", guest: 22, host: 2230, id: 'ssh', auto_correct: true
         magento.vm.hostname = "magento"
         magento.vm.provider 'docker' do |d|
             d.image = "proxiblue/magento2:latest"
@@ -154,6 +152,7 @@ Vagrant.configure('2') do |config|
                 trigger.info = "Found overlay config: #{vue_kibana_config}"
             end
         end
+
         kibana.vm.network :private_network, ip: "172.20.0.205", subnet: "172.20.0.0/16"
         kibana.vm.hostname = "kibana"
         kibana.vm.communicator = 'docker'
@@ -175,12 +174,13 @@ Vagrant.configure('2') do |config|
             trigger.name = "overlay config"
             # Check if vue local.json config exists, and copy it to the vue config folder
             # any edits must be made in teh overlay file. Edits in teh destination file will be overwritten
-            if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront-api/config/local.json")
-                FileUtils.copy_file("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront-api/config/local.json",
+            config_file="local.json"
+            if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront-api/config/#{config_file}")
+                FileUtils.copy_file("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront-api/config/#{config_file}",
                 "#{vagrant_root}/sites/vue-storefront-api/config/local.json")
-                trigger.info = "Found overlay local.json. It was copied to the base vue config folder."
+                trigger.info = "Found overlay #{config_file}. It was copied to the base vue config folder."
             end
-            # check that the /tmp/vueapi folder exists (which is used to simulated teh tmpfs setup as per vue composer files
+            # check that the /tmp/vueapi folder exists (which is used to simulated the tmpfs setup as per vue composer files
             if File.directory?("/tmp/vueapi")
                 FileUtils.rm_rf("/tmp/vueapi")
                 FileUtils.mkdir_p("/tmp/vueapi")
@@ -228,10 +228,11 @@ Vagrant.configure('2') do |config|
             trigger.name = "overlay config"
             # Check if vue local.json config exists, and copy it to the vue config folder
             # any edits must be made in teh overlay file. Edits in teh destination file will be overwritten
-            if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront/config/local.json")
-                FileUtils.copy_file("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront/config/local.json",
+            config_file="local.json"
+            if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront/config/#{config_file}")
+                FileUtils.copy_file("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront/config/#{config_file}",
                 "#{vagrant_root}/sites/vue-storefront/config/local.json")
-                trigger.info = "Found overlay local.json. It was copied to the base vue config folder."
+                trigger.info = "Found overlay #{config_file}. It was copied to the base vue config folder."
             end
             # check that the /tmp/vuestorefront folder exists (which is used to simulated teh tmpfs setup as per vue composer files
             if File.directory?("/tmp/vuestorefront")
@@ -242,6 +243,7 @@ Vagrant.configure('2') do |config|
 
         end
         vuestorefront.vm.network :private_network, ip: "172.20.0.207", subnet: "172.20.0.0/16"
+        vuestorefront.vm.network "forwarded_port", guest: 22, host: Random.new.rand(1000...5000), id: 'ssh', auto_correct: true
         vuestorefront.vm.hostname = "vuestorefront"
         vuestorefront.vm.communicator = 'docker'
         vuestorefront.vm.provider 'docker' do |d|
@@ -276,8 +278,9 @@ Vagrant.configure('2') do |config|
 
     if File.exist?("#{vagrant_root}/reverseproxy/nginx.conf")
         config.vm.define "reverseproxy", primary: false do |reverseproxy|
-            reverseproxy.hostmanager.aliases = [ "reverseproxy."+dev_domain ]
+            reverseproxy.hostmanager.aliases = [ "reverseproxy."+dev_domain, "api."+dev_domain  ]
             reverseproxy.vm.network :private_network, ip: "172.20.0.210", subnet: "172.20.0.0/16"
+            reverseproxy.vm.network "forwarded_port", guest: 22, host: Random.new.rand(1000...5000), id: 'ssh', auto_correct: true
             reverseproxy.vm.hostname = "reverseproxy"
             reverseproxy.vm.communicator = 'docker'
             reverseproxy.vm.provider 'docker' do |d|

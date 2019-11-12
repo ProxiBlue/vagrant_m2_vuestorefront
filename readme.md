@@ -52,9 +52,9 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
     * you might want to install sample data: https://devdocs.magento.com/guides/v2.3/install-gde/install/cli/install-cli-sample-data.html
 * copy the vue config files to the overlay folder: (these actions are run on the HOST)
     * ```mkdir -p ./vuestorefront-config-overlay/vue-storefront-api/config/```
-    * ```cp -xav ./sites/vue-storefront-api/config/default.json ././vuestorefront-config-overlay/vue-storefront-api/config/local.json```
+    * ```cp -xav ./sites/vue-storefront-api/config/default.json ./vuestorefront-config-overlay/vue-storefront-api/config/local.json.noproxy```
     * ```mkdir -p ./vuestorefront-config-overlay/vue-storefront/config/```
-    * ```cp -xav ./sites/vue-storefront/config/default.json ././vuestorefront-config-overlay/vue-storefront/config/local.json```    
+    * ```cp -xav ./sites/vue-storefront/config/default.json ./vuestorefront-config-overlay/vue-storefront/config/local.json.noproxy```    
 * Follow this guide, and setup magento OAuth keys: https://docs.vuestorefront.io/guide/installation/magento.html (remember, you will edit the OVERLAY CONFIGS)
     * you want to stop here: ```yarn mage2vs import``` - you only want to do the OAuth keys, not the import, that is the next step!
 * Install https://github.com/DivanteLtd/magento2-vsbridge-indexer
@@ -69,10 +69,11 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
         * vueStorefront api host: ```vueapi```
         * magento host: ```magento.<YOUR DOMAIN>``` (you must use the FQDN for magento, else magento will redirect)
         * vueStorefront : ```vuestorefront```
+        * magento 2 vue image assetPath: ```"assetPath": "/vagrant/sites/magento2/pub/media"``` (https://github.com/DivanteLtd/vue-storefront/blob/master/docs/guide/basics/recipes.md#running-vue-storefront-api-on-a-different-machine-than-magento--images-not-working)
     * You can also use the FQDN with your set dev domain for any of the above    
     * If you have activated the reverse proxy, you can use api.<YOUR DEV DOMAIN> for all hosts, as they will go via teh proxy.
        
-* bring the entire environment down, then back up: ```exit``` && ```vagrant halt``` && ```vagrant up```
+* bring the entire environment down, then back up: ```exit``` && ```vagrant halt``` && ```vagrant up --no-parallel```
 * wait a moment for vuestorefront to start. you can follow the progress using : ```docker logs -f vuestorefront``` (NOTE: this is also the best way to debug, as you will get pointed errors noted inthe console. Example, connection errors)
 
 Done, you should be able to browse to vueStorefront using: http://vuestorefront:3000
@@ -266,6 +267,11 @@ Example:
 },
 
 ```
+
+#### NOTE: 
+
+If you use a proxy, you need to adjust the local.json configs for vuestorefront, and vue api.
+The API urls need to be adjusted to be that of the PROXY, which will then hit the proxy, and be translated.
 
 #### SSL certificate
 
