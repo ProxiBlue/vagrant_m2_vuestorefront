@@ -77,6 +77,10 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
 
 Done, you should be able to browse to vueStorefront using: http://vuestorefront:3000
 
+I have found the best startup command is: ```vagrant up --no-parallel && vagrant hostmanager --provider docker``` which also re-jigs the hostmanager host file entries, as I had found that some randomly fail to get the entries created during startup.
+I place this an an alias on my linux host
+
+
 ## Additional things to do
 
 ### setup Kibana
