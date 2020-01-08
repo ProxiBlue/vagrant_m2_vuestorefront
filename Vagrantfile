@@ -117,13 +117,14 @@ Vagrant.configure('2') do |config|
     config.vm.define "elasticsearch", primary: false do |elasticsearch|
         elasticsearch.hostmanager.aliases = [ "elasticsearch."+dev_domain ]
         vue_elastic_config="#{vagrant_root}/sites/vue-storefront-api/docker/elasticsearch/config/elasticsearch.yml"
-        elasticsearch.trigger.before :up do |trigger|
+        elasticsearch.trigger.before :all do |trigger|
             trigger.name = "overlay config"
             # Check if overlay config for elastic search exists.
             if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/elasticsearch/config/elasticsearch.yml")
                 vue_elastic_config="#{vagrant_root}/vuestorefront-config-overlay/elasticsearch/config/elasticsearch.yml"
                 trigger.info = "Found overlay config: #{vue_elastic_config}"
             end
+            trigger.ignore = [:destroy, :halt]
         end
         elasticsearch.vm.network :private_network, ip: "172.20.0.204", subnet: "172.20.0.0/16"
         elasticsearch.vm.hostname = "elasticsearch"
@@ -144,15 +145,16 @@ Vagrant.configure('2') do |config|
     config.vm.define "kibana", primary: false do |kibana|
         kibana.hostmanager.aliases =  [ "kibana."+dev_domain ]
         vue_kibana_config="#{vagrant_root}/sites/vue-storefront-api/docker/kibana/config/"
-        kibana.trigger.before :up do |trigger|
+        kibana.trigger.before :all do |trigger|
             trigger.name = "overlay config"
             # Check if overlay config for kibana exists.
             if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/kibana/config/kibana.yml")
                 vue_kibana_config="#{vagrant_root}/vuestorefront-config-overlay/kibana/config/"
                 trigger.info = "Found overlay config: #{vue_kibana_config}"
             end
+            trigger.ignore = [:destroy, :halt]
         end
-
+        kibana.vm.network "forwarded_port", guest: 22, host: Random.new.rand(1000...5000), id: 'ssh', auto_correct: true
         kibana.vm.network :private_network, ip: "172.20.0.205", subnet: "172.20.0.0/16"
         kibana.vm.hostname = "kibana"
         kibana.vm.communicator = 'docker'
@@ -170,7 +172,7 @@ Vagrant.configure('2') do |config|
 
     config.vm.define "vueapi", primary: false do |vueapi|
         vueapi.hostmanager.aliases = [ "vueapi."+dev_domain ]
-        vueapi.trigger.before :up do |trigger|
+        vueapi.trigger.before :all do |trigger|
             trigger.name = "overlay config"
             # Check if vue local.json config exists, and copy it to the vue config folder
             # any edits must be made in teh overlay file. Edits in teh destination file will be overwritten
@@ -186,7 +188,7 @@ Vagrant.configure('2') do |config|
                 FileUtils.mkdir_p("/tmp/vueapi")
                 trigger.info = "Temp folder /tmp/vueapi created."
             end
-
+            trigger.ignore = [:destroy, :halt]
         end
         vueapi.vm.network :private_network, ip: "172.20.0.206", subnet: "172.20.0.0/16"
         vueapi.vm.hostname = "vueapi"
@@ -224,7 +226,7 @@ Vagrant.configure('2') do |config|
     config.vm.define "vuestorefront", primary: false do |vuestorefront|
         vuestorefront.hostmanager.enabled = true
         vuestorefront.hostmanager.aliases =  [ "vuestorefront."+dev_domain ]
-        vuestorefront.trigger.before :up do |trigger|
+        vuestorefront.trigger.before :all do |trigger|
             trigger.name = "overlay config"
             # Check if vue local.json config exists, and copy it to the vue config folder
             # any edits must be made in teh overlay file. Edits in teh destination file will be overwritten
@@ -240,7 +242,7 @@ Vagrant.configure('2') do |config|
                 FileUtils.mkdir_p("/tmp/vuestorefront")
                 trigger.info = "Temp folder /tmp/vuestorefront created."
             end
-
+            trigger.ignore = [:destroy, :halt]
         end
         vuestorefront.vm.network :private_network, ip: "172.20.0.207", subnet: "172.20.0.0/16"
         vuestorefront.vm.network "forwarded_port", guest: 22, host: Random.new.rand(1000...5000), id: 'ssh', auto_correct: true
