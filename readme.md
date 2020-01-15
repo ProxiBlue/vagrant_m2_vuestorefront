@@ -301,7 +301,7 @@ You need to make two edits to the vueSF files.
 
 Edit ```sites/vue-storefront/pacakge.json```, and find the entry for ```dev:inspect``` and in that line, replace ```node --inspect``` with ```node --inspect=0.0.0.0:9229```
 This will tell the debugger listener to listen on all interfaces. Default is localhost only, and since this is in a docker, you will not be able to export that to external.
-** You may also need to edit teh ending part and change ```server``` to ```server.ts``` ** 
+** You may also need to edit the ending part and change ```server``` to ```server.ts``` ** 
 
 Edit ```sites/vue-storefront/docker/vue-storefront/vue-storefront.sh``` and replace ```yarn dev``` with ```yarn dev:inspect```
 
@@ -316,7 +316,7 @@ You need to make two edits to the api files.
 Edit ```sites/vue-storefront-api/pacakge.json```, and find the entry for ```dev:inspect``` and in that line, replace ```node --inspect``` with ```node --inspect=0.0.0.0:9229```
 This will tell the debugger listener to listen on all interfaces. Default is localhost only, and since this is in a docker, you will not be able to export that to external.
 
-Edit ```sites/vuestorefront/docker/vue-storefront/vue-storefront.sh``` and replace ```yarn dev``` with ```yarn dev:inspect```
+Edit ```sites/vue-storefront-api/docker/vue-storefront-api/vue-storefront-api.sh``` and replace ```yarn dev``` with ```yarn dev:inspect```
 
 Now issue a reload of vuestorefrontapi: ```vagrant reload vueapi```
 
