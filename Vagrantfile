@@ -190,6 +190,11 @@ Vagrant.configure('2') do |config|
             end
             trigger.ignore = [:destroy, :halt]
         end
+
+        if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront-api/boot.sh")
+                config.vm.provision "shell", path: "#{vagrant_root}/vuestorefront-config-overlay/vue-storefront-api/boot.sh", privileged: true
+        end
+
         vueapi.vm.network :private_network, ip: "172.20.0.206", subnet: "172.20.0.0/16"
         vueapi.vm.hostname = "vueapi"
         vueapi.vm.communicator = 'docker'

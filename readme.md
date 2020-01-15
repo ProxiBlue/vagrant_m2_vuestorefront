@@ -253,6 +253,11 @@ reUsing their docker builds shoudl produced greater ongoing compatibility, with 
 
 REMEMBER: If you edit the local.json configs, for either service, you need to restart instances!
 
+### Custom commands after docker startup
+
+You can place a file called ```boot.sh```, located inside both folders on the overlay, and if it exists, the commands within will be run after a docker box comes up
+example: vuestorefront-config-overlay/vue-storefront-api/boot.sh will run as soon as the instance is up
+
 ### a Reverse Proxy
 
 Imagine you have a multistore setup. YEs, you can access the multipe stores via http://vuestorefront:3000/<STORE>, but that is hardly ideal.
@@ -287,6 +292,35 @@ The run:
 * ```mkcert <YOUR DEV DOMAIN>```
 
 You will be given 2 x .pem file, one for the cert, the other for the key. Copy them into the ```reverseproxy``` folder.
+
+### Ability to connect a debugger (example from PHPStorm)
+
+1. VueStoreFront
+
+You need to make two edits to the vueSF files. 
+
+Edit ```sites/vue-storefront/pacakge.json```, and find the entry for ```dev:inspect``` and in that line, replace ```node --inspect``` with ```node --inspect=0.0.0.0:9229```
+This will tell the debugger listener to listen on all interfaces. Default is localhost only, and since this is in a docker, you will not be able to export that to external.
+** You may also need to edit teh ending part and change ```server``` to ```server.ts``` ** 
+
+Edit ```sites/vue-storefront/docker/vue-storefront/vue-storefront.sh``` and replace ```yarn dev``` with ```yarn dev:inspect```
+
+Now issue a reload of vuestorefront: ```vagrant reload vuestorefront```
+
+Next setup your debugger connection to listen to the IP of vuestorefront (172.20.0.207)
+
+2. Vue API
+
+You need to make two edits to the api files. 
+
+Edit ```sites/vue-storefront-api/pacakge.json```, and find the entry for ```dev:inspect``` and in that line, replace ```node --inspect``` with ```node --inspect=0.0.0.0:9229```
+This will tell the debugger listener to listen on all interfaces. Default is localhost only, and since this is in a docker, you will not be able to export that to external.
+
+Edit ```sites/vuestorefront/docker/vue-storefront/vue-storefront.sh``` and replace ```yarn dev``` with ```yarn dev:inspect```
+
+Now issue a reload of vuestorefrontapi: ```vagrant reload vueapi```
+
+Next setup your debugger connection to listen to the IP of vueapi (172.20.0.206)
 
 
 ### Debugging startup
@@ -369,5 +403,6 @@ You have started everything up, but there is no networking between the HOST and 
 If you check IP allocation to the magento docker : ```vagrant ssh``` then ```ifconfig``` shows no ip range of 172.20.x.x was assigned to the instances
 
 * You need to update vagrant!
+
 
 
