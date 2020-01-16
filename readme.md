@@ -70,7 +70,13 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
         * vueStorefront : ```vuestorefront```
         * magento 2 vue image assetPath: ```"assetPath": "/vagrant/sites/magento2/pub/media"``` (https://github.com/DivanteLtd/vue-storefront/blob/master/docs/guide/basics/recipes.md#running-vue-storefront-api-on-a-different-machine-than-magento--images-not-working)
     * You can also use the FQDN with your set dev domain for any of the above    
-    * If you have activated the reverse proxy, you can use api.<YOUR DEV DOMAIN> for all hosts, as they will go via teh proxy.
+    * If you have activated the reverse proxy, you can use api.<YOUR DEV DOMAIN> for all hosts, as they will go via the proxy.
+ 
+ It is advised to use the proxy, as it allows you to completely hide the actual vueSF and API urls from the client.
+ Example: 
+ 
+     * http://vueapi:8080/api/ext/braintree can become https://api.enjo.test/api/ext/braintree which is the url rendered in the client browser, and the proxy will translate it to the internal url
+     
        
 * bring the entire environment down, then back up: ```exit``` && ```vagrant halt``` && ```vagrant up --no-parallel```
 * wait a moment for vuestorefront to start. you can follow the progress using : ```docker logs -f vuestorefront``` (NOTE: this is also the best way to debug, as you will get pointed errors noted inthe console. Example, connection errors)
