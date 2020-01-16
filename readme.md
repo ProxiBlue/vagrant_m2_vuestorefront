@@ -51,9 +51,9 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
     * you might want to install sample data: https://devdocs.magento.com/guides/v2.3/install-gde/install/cli/install-cli-sample-data.html
 * copy the vue config files to the overlay folder: (these actions are run on the HOST) I keep the overlay folder as a seperate GIT repo, so it can me checked out on a new setup.
     * ```mkdir -p ./vuestorefront-config-overlay/vue-storefront-api/config/```
-    * ```cp -xav ./sites/vue-storefront-api/config/default.json ./vuestorefront-config-overlay/vue-storefront-api/config/local.json.noproxy```
+    * ```cp -xav ./sites/vue-storefront-api/config/default.json ./vuestorefront-config-overlay/vue-storefront-api/config/local.json```
     * ```mkdir -p ./vuestorefront-config-overlay/vue-storefront/config/```
-    * ```cp -xav ./sites/vue-storefront/config/default.json ./vuestorefront-config-overlay/vue-storefront/config/local.json.noproxy```    
+    * ```cp -xav ./sites/vue-storefront/config/default.json ./vuestorefront-config-overlay/vue-storefront/config/local.json```    
 * Follow this guide, and setup magento OAuth keys: https://docs.vuestorefront.io/guide/installation/magento.html (remember, you will edit the OVERLAY CONFIGS)
     * you want to stop here: ```yarn mage2vs import``` - you only want to do the OAuth keys, not the import, that is the next step!
 * Install https://github.com/DivanteLtd/magento2-vsbridge-indexer
