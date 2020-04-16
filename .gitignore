@@ -4,4 +4,4 @@ sites
 vuestorefront-config-overlay/*
 custom/*
 reverseproxy/*
-
+persistent_storage/
