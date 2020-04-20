@@ -31,6 +31,9 @@ Vagrant.configure('2') do |config|
     config.hostmanager.manage_guest = true
     config.hostmanager.ignore_private_ip = false
     config.hostmanager.include_offline = false
+    config.trigger.after :up do |trigger|
+      trigger.run = {inline: "bash -c 'vagrant hostmanager --provider docker'"}
+    end
     config.vm.define "magento", primary: true do |magento|
         magento.hostmanager.aliases = [ "magento."+dev_domain ]
         magento.vm.provision "shell" do |s|
@@ -249,6 +252,11 @@ Vagrant.configure('2') do |config|
             end
             trigger.ignore = [:destroy, :halt]
         end
+
+        if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront/boot.sh")
+                config.vm.provision "shell", path: "#{vagrant_root}/vuestorefront-config-overlay/vue-storefront/boot.sh", privileged: true
+        end
+
         vuestorefront.vm.network :private_network, ip: "172.20.0.207", subnet: "172.20.0.0/16"
         vuestorefront.vm.network "forwarded_port", guest: 22, host: Random.new.rand(1000...5000), id: 'ssh', auto_correct: true
         vuestorefront.vm.hostname = "vuestorefront"
