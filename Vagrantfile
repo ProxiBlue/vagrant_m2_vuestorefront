@@ -5,10 +5,11 @@ startSSHPort = 2250
 # Generate a random port number
 # fixes issue where two boxes try and map port 22, if you run multiple vagrant environments in one host
 vagrant_root = File.dirname(__FILE__)
-dev_domain = ENV['DEV_DOMAIN'] || raise('You need to define a local DEV_DOMAIN environment variable!')
+dev_domain = 'enjo.test'
 mysql_password = ENV['MYSQL_ROOT_PASSWORD'] || "root"
-persistent_storage = ENV['PERSISTENT_STORAGE'] || raise('You need to define absolute path for persistent storage. Path will be created.')
+persistent_storage = vagrant_root + '/persistent_storage'
 mode = ENV['VAGRANT_MODE'] || 'dev'
+ip_range = "172.25.10"
 
 puts "========================================================"
 puts "domain : #{dev_domain}"
@@ -49,7 +50,7 @@ Vagrant.configure('2') do |config|
         magento.ssh.username = "vagrant"
         magento.ssh.password = "vagrant"
         magento.ssh.keys_only = false
-        magento.vm.network :private_network, ip: "172.20.0.200", subnet: "172.20.0.0/16"
+        magento.vm.network :private_network, ip: "#{ip_range}.200", subnet: "#{ip_range}.0/16"
         magento.vm.network "forwarded_port", guest: 22, host: 2230, id: 'ssh', auto_correct: true
         magento.vm.hostname = "magento"
         magento.vm.provider 'docker' do |d|
@@ -66,7 +67,7 @@ Vagrant.configure('2') do |config|
 
     config.vm.define "database", primary: false do |database|
         database.hostmanager.aliases = [ "database."+dev_domain ]
-        database.vm.network :private_network, ip: "172.20.0.208", subnet: "172.20.0.0/16"
+        database.vm.network :private_network, ip: "#{ip_range}.208", subnet: "#{ip_range}.0/16"
         database.vm.hostname = "database"
         database.vm.communicator = 'docker'
         database.vm.provider 'docker' do |d|
@@ -80,24 +81,25 @@ Vagrant.configure('2') do |config|
     end
 
     config.vm.define "redis", primary: false do |redis|
-        redis.vm.network :private_network, ip: "172.20.0.201", subnet: "172.20.0.0/16"
-        redis.vm.hostname = "redis"
+        redis.hostmanager.aliases = [ "redis."+dev_domain ]
+        redis.vm.network :private_network, ip: "#{ip_range}.201", subnet: "#{ip_range}.0/16"
+        redis.vm.hostname = "redispwa"
         redis.vm.provider 'docker' do |d|
             d.image = "redis:latest"
             d.has_ssh = false
-            d.name = "redis"
+            d.name = "redispwa"
             d.remains_running = true
         end
     end
 
     config.vm.define "elasticsearchm2", primary: false do |elasticsearchm2|
         elasticsearchm2.hostmanager.aliases = [ "elasticsearchm2."+dev_domain ]
-        elasticsearchm2.vm.network :private_network, ip: "172.20.0.202", subnet: "172.20.0.0/16"
-        elasticsearchm2.vm.hostname = "elasticsearchm2"
+        elasticsearchm2.vm.network :private_network, ip: "#{ip_range}.202", subnet: "#{ip_range}.0/16"
+        elasticsearchm2.vm.hostname = "elasticsearchm2pwa"
         elasticsearchm2.vm.provider 'docker' do |d|
             d.image = "docker.elastic.co/elasticsearch/elasticsearch:6.8.3"
             d.has_ssh = false
-            d.name = "elasticsearchm2"
+            d.name = "elasticsearchm2pwa"
             d.remains_running = true
             d.volumes = [
                 "#{persistent_storage}/elasticsearchm2:/usr/share/elasticsearch/data"
@@ -107,12 +109,12 @@ Vagrant.configure('2') do |config|
 
     config.vm.define "rabbitmq", primary: false do |rabbitmq|
         rabbitmq.hostmanager.aliases = [ "rabbitmq."+dev_domain ]
-        rabbitmq.vm.network :private_network, ip: "172.20.0.203", subnet: "172.20.0.0/16"
-        rabbitmq.vm.hostname = "rabbitmq"
+        rabbitmq.vm.network :private_network, ip: "#{ip_range}.203", subnet: "#{ip_range}.0/16"
+        rabbitmq.vm.hostname = "rabbitmqpwa"
         rabbitmq.vm.provider 'docker' do |d|
             d.image = "rabbitmq:latest"
             d.has_ssh = false
-            d.name = "rabbitmq"
+            d.name = "rabbitmqpwa"
             d.remains_running = true
         end
     end
@@ -129,13 +131,13 @@ Vagrant.configure('2') do |config|
             end
             trigger.ignore = [:destroy, :halt]
         end
-        elasticsearch.vm.network :private_network, ip: "172.20.0.204", subnet: "172.20.0.0/16"
-        elasticsearch.vm.hostname = "elasticsearch"
+        elasticsearch.vm.network :private_network, ip: "#{ip_range}.204", subnet: "#{ip_range}.0/16"
+        elasticsearch.vm.hostname = "elasticsearchpwa"
         elasticsearch.vm.provider 'docker' do |d|
             d.build_dir = "#{vagrant_root}/sites/vue-storefront-api/docker/elasticsearch"
             d.dockerfile = "Dockerfile"
             d.has_ssh = false
-            d.name = "elasticsearch"
+            d.name = "elasticsearchpwa"
             d.remains_running = true
             d.volumes = [
                 "#{vue_elastic_config}:/usr/share/elasticsearch/config/elasticsearch.yml:ro",
@@ -158,14 +160,14 @@ Vagrant.configure('2') do |config|
             trigger.ignore = [:destroy, :halt]
         end
         kibana.vm.network "forwarded_port", guest: 22, host: Random.new.rand(1000...5000), id: 'ssh', auto_correct: true
-        kibana.vm.network :private_network, ip: "172.20.0.205", subnet: "172.20.0.0/16"
-        kibana.vm.hostname = "kibana"
+        kibana.vm.network :private_network, ip: "#{ip_range}.205", subnet: "#{ip_range}.0/16"
+        kibana.vm.hostname = "kibanapwa"
         kibana.vm.communicator = 'docker'
         kibana.vm.provider 'docker' do |d|
             d.build_dir = "#{vagrant_root}/sites/vue-storefront-api/docker/kibana"
             d.dockerfile = "Dockerfile"
             d.has_ssh = true
-            d.name = "kibana"
+            d.name = "kibanapwa"
             d.remains_running = true
             d.volumes = [
                 "#{vue_kibana_config}:/usr/share/kibana/config:ro"
@@ -198,7 +200,7 @@ Vagrant.configure('2') do |config|
                 config.vm.provision "shell", path: "#{vagrant_root}/vuestorefront-config-overlay/vue-storefront-api/boot.sh", privileged: true
         end
 
-        vueapi.vm.network :private_network, ip: "172.20.0.206", subnet: "172.20.0.0/16"
+        vueapi.vm.network :private_network, ip: "#{ip_range}.206", subnet: "#{ip_range}.0/16"
         vueapi.vm.hostname = "vueapi"
         vueapi.vm.communicator = 'docker'
         vueapi.vm.provider 'docker' do |d|
@@ -252,12 +254,10 @@ Vagrant.configure('2') do |config|
             end
             trigger.ignore = [:destroy, :halt]
         end
-
         if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront/boot.sh")
                 config.vm.provision "shell", path: "#{vagrant_root}/vuestorefront-config-overlay/vue-storefront/boot.sh", privileged: true
         end
-
-        vuestorefront.vm.network :private_network, ip: "172.20.0.207", subnet: "172.20.0.0/16"
+        vuestorefront.vm.network :private_network, ip: "#{ip_range}.207", subnet: "#{ip_range}.0/16"
         vuestorefront.vm.network "forwarded_port", guest: 22, host: Random.new.rand(1000...5000), id: 'ssh', auto_correct: true
         vuestorefront.vm.hostname = "vuestorefront"
         vuestorefront.vm.communicator = 'docker'
@@ -294,7 +294,7 @@ Vagrant.configure('2') do |config|
     if File.exist?("#{vagrant_root}/reverseproxy/nginx.conf")
         config.vm.define "reverseproxy", primary: false do |reverseproxy|
             reverseproxy.hostmanager.aliases = [ "reverseproxy."+dev_domain, "api."+dev_domain  ]
-            reverseproxy.vm.network :private_network, ip: "172.20.0.210", subnet: "172.20.0.0/16"
+            reverseproxy.vm.network :private_network, ip: "#{ip_range}.210", subnet: "#{ip_range}.0/16"
             reverseproxy.vm.network "forwarded_port", guest: 22, host: Random.new.rand(1000...5000), id: 'ssh', auto_correct: true
             reverseproxy.vm.hostname = "reverseproxy"
             reverseproxy.vm.communicator = 'docker'
