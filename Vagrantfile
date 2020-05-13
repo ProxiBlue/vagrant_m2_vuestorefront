@@ -9,7 +9,7 @@ dev_domain = 'enjo.test'
 mysql_password = ENV['MYSQL_ROOT_PASSWORD'] || "root"
 persistent_storage = vagrant_root + '/persistent_storage'
 mode = ENV['VAGRANT_MODE'] || 'dev'
-ip_range = "172.25.10"
+ip_range = "172.23.1"
 
 puts "========================================================"
 puts "domain : #{dev_domain}"
@@ -17,6 +17,7 @@ puts "folder : #{vagrant_root}"
 puts "mysql root password : #{mysql_password}"
 puts "mode: #{mode}"
 puts "persistent storage: #{persistent_storage}"
+puts "ip range used: #{ip_range}"
 puts "========================================================"
 
 FileUtils.mkdir_p(persistent_storage)
@@ -37,16 +38,18 @@ Vagrant.configure('2') do |config|
     end
     config.vm.define "magento", primary: true do |magento|
         magento.hostmanager.aliases = [ "magento."+dev_domain ]
+        magento.vm.provision "file", source: "#{vagrant_root}/magento.nginx.conf", destination: "/tmp/magento.nginx.conf"
         magento.vm.provision "shell" do |s|
             s.path = "bootstrap.sh"
-            s.args = "#{dev_domain}"
+            s.args = "#{dev_domain} #{ip_range}.200"
         end
         if File.exist?("provision/bootstrap.sh")
             magento.vm.provision "shell" do |s|
                 s.path = "provision/bootstrap.sh"
-                s.args = "#{dev_domain}"
+                s.args = "#{dev_domain} #{ip_range}.200"
             end
         end
+
         magento.ssh.username = "vagrant"
         magento.ssh.password = "vagrant"
         magento.ssh.keys_only = false
@@ -61,7 +64,7 @@ Vagrant.configure('2') do |config|
             d.create_args = ["--cap-add=NET_ADMIN"]
             d.remains_running = true
             d.volumes = ["/tmp/.X11-unix:/tmp/.X11-unix", ENV['HOME']+"/.ssh/:/home/vagrant/.ssh", ENV['HOME']+"/.composer:/home/vagrant/.composer"]
-            d.env = { "DEV_DOMAIN" => "#{dev_domain}" }
+            d.env = { "DEV_DOMAIN" => "#{dev_domain}", "WEB_IP" => "#{dev_domain}" }
         end
     end
 
@@ -197,7 +200,7 @@ Vagrant.configure('2') do |config|
         end
 
         if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront-api/boot.sh")
-                config.vm.provision "shell", path: "#{vagrant_root}/vuestorefront-config-overlay/vue-storefront-api/boot.sh", privileged: true
+                vueapi.vm.provision "shell", path: "#{vagrant_root}/vuestorefront-config-overlay/vue-storefront-api/boot.sh", privileged: true
         end
 
         vueapi.vm.network :private_network, ip: "#{ip_range}.206", subnet: "#{ip_range}.0/16"
@@ -255,7 +258,7 @@ Vagrant.configure('2') do |config|
             trigger.ignore = [:destroy, :halt]
         end
         if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront/boot.sh")
-                config.vm.provision "shell", path: "#{vagrant_root}/vuestorefront-config-overlay/vue-storefront/boot.sh", privileged: true
+                vuestorefront.vm.provision "shell", path: "#{vagrant_root}/vuestorefront-config-overlay/vue-storefront/boot.sh", privileged: true
         end
         vuestorefront.vm.network :private_network, ip: "#{ip_range}.207", subnet: "#{ip_range}.0/16"
         vuestorefront.vm.network "forwarded_port", guest: 22, host: Random.new.rand(1000...5000), id: 'ssh', auto_correct: true
