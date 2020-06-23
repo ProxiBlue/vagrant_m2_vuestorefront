@@ -267,8 +267,14 @@ example: vuestorefront-config-overlay/vue-storefront-api/boot.sh will run as soo
 Imagine you have a multistore setup. YEs, you can access the multipe stores via http://vuestorefront:3000/<STORE>, but that is hardly ideal.
 You would want to access each store via a proper URL. Example store.example.com, store2.example.com etc
 
-For this, you can create an nginx config file that you place in the reverseproxy folder. If that nginz.conf exists, an nginx instance on ip 172.20.0.210 will be brought up, and run that given nginx file
-The domain ```api.<YOUR DEV DOMAIN``` will be placed into all guest machines, and your host. You can use the api.<dev_domain> address to set all connections to inthe local.json files
+For this, you can create an nginx config file that you place in the reverseproxy folder. If that nginx.conf exists, an nginx instance on ip 172.20.0.210 will be brought up, and run that given nginx file
+
+Example conf file for multipel stores:
+
+https://gist.github.com/ProxiBlue/77589a96abdd1e9bd6b5942ab0916711
+
+
+The domain ```api.<YOUR DEV DOMAIN``` will be placed into all guest machines, and your host. You can use the api.<dev_domain> address to set all connections to the local.json files
 
 Example: 
 
