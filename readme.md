@@ -45,7 +45,7 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
 * then ```exit``` to exit vagrant, and reload ```vagrant reload magento``` (will now start without error)
 * browse to ```https://magento.<THE DEV DOMAIN YOU USE>``` and install magento 2. The database server will be ```database.<YOUR DOMAIN>```
     * you might want to install sample data: https://devdocs.magento.com/guides/v2.3/install-gde/install/cli/install-cli-sample-data.html
-* copy the vue config files to the overlay folder: (these actions are run on the HOST) I keep the overlay folder as a seperate GIT repo, so it can me checked out on a new setup.
+* copy the vue config files to the overlay folder: (these actions are run on the HOST) I keep the overlay folder as a seperate GIT repo, so it can be checked out on a new setup.
     * ```mkdir -p ./vuestorefront-config-overlay/vue-storefront-api/config/```
     * ```cp -xav ./sites/vue-storefront-api/config/default.json ./vuestorefront-config-overlay/vue-storefront-api/config/local.json```
     * ```mkdir -p ./vuestorefront-config-overlay/vue-storefront/config/```
