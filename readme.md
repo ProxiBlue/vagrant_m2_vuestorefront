@@ -45,7 +45,7 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
 * then ```exit``` to exit vagrant, and reload ```vagrant reload magento``` (will now start without error)
 * browse to ```https://magento.<THE DEV DOMAIN YOU USE>``` and install magento 2. The database server will be ```database.<YOUR DOMAIN>```
     * you might want to install sample data: https://devdocs.magento.com/guides/v2.3/install-gde/install/cli/install-cli-sample-data.html
-* copy the vue config files to the overlay folder: (these actions are run on the HOST) I keep the overlay folder as a seperate GIT repo, so it can me checked out on a new setup.
+* copy the vue config files to the overlay folder: (these actions are run on the HOST) I keep the overlay folder as a seperate GIT repo, so it can be checked out on a new setup.
     * ```mkdir -p ./vuestorefront-config-overlay/vue-storefront-api/config/```
     * ```cp -xav ./sites/vue-storefront-api/config/default.json ./vuestorefront-config-overlay/vue-storefront-api/config/local.json```
     * ```mkdir -p ./vuestorefront-config-overlay/vue-storefront/config/```
@@ -55,7 +55,11 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
 * Install https://github.com/DivanteLtd/magento2-vsbridge-indexer
     * ```vagrant ssh```
     * ```composer require divante/magento2-vsbridge-indexer```
-    * ```composer require divante/magento2-vsbridge-indexer-msi:0.1.0```    
+    * ```composer require divante/magento2-vsbridge-indexer-msi:0.1.0```   
+    
+    <b>NOTE:/b> Magent 2.3.5 /  Elastic 7: ```divante/magento2-vsbridge-indexer``` should be substituted with ```"divante/magento2-vsbridge-indexer": "2.x-dev"```
+    <b>NOTE:/b> Remember to set the elastic version use din the config here: https://github.com/DivanteLtd/vue-storefront-api/blob/master/config/default.json#L42 (naturally,edit your config file, not the default one)
+     
     * configure as per their guide, and re-index.
 * Edit the rest of vueStorefront configs, and set according to YOUR needs
     * Note that you can set the following, in accordance to this environment: 
@@ -267,8 +271,14 @@ example: vuestorefront-config-overlay/vue-storefront-api/boot.sh will run as soo
 Imagine you have a multistore setup. YEs, you can access the multipe stores via http://vuestorefront:3000/<STORE>, but that is hardly ideal.
 You would want to access each store via a proper URL. Example store.example.com, store2.example.com etc
 
-For this, you can create an nginx config file that you place in the reverseproxy folder. If that nginz.conf exists, an nginx instance on ip 172.20.0.210 will be brought up, and run that given nginx file
-The domain ```api.<YOUR DEV DOMAIN``` will be placed into all guest machines, and your host. You can use the api.<dev_domain> address to set all connections to inthe local.json files
+For this, you can create an nginx config file that you place in the reverseproxy folder. If that nginx.conf exists, an nginx instance on ip 172.20.0.210 will be brought up, and run that given nginx file
+
+Example conf file for multipel stores:
+
+https://gist.github.com/ProxiBlue/77589a96abdd1e9bd6b5942ab0916711
+
+
+The domain ```api.<YOUR DEV DOMAIN``` will be placed into all guest machines, and your host. You can use the api.<dev_domain> address to set all connections to the local.json files
 
 Example: 
 
