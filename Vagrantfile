@@ -313,4 +313,18 @@ Vagrant.configure('2') do |config|
             end
         end
     end
+
+    config.vm.define "broker", primary: false do |broker|
+        broker.hostmanager.aliases =  [ "broker."+dev_domain ]
+        broker.vm.network "forwarded_port", guest: 22, host: Random.new.rand(1000...5000), id: 'ssh', auto_correct: true
+        broker.vm.network :private_network, ip: "#{ip_range}.220", subnet: "#{ip_range}.0/16"
+        broker.vm.hostname = "brokerpwa"
+        broker.vm.provider 'docker' do |d|
+            d.image = "enjo/ubuntu-devbox:latest"
+            d.has_ssh = true
+            d.name = "brokerpwa"
+            d.remains_running = true
+            d.volumes = [ENV['HOME']+"/.ssh/:/home/vagrant/.ssh", ENV['HOME']+"/.composer:/home/vagrant/.composer"]
+        end
+    end
 end
