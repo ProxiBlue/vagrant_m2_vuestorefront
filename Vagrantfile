@@ -319,6 +319,9 @@ Vagrant.configure('2') do |config|
         broker.vm.network "forwarded_port", guest: 22, host: Random.new.rand(1000...5000), id: 'ssh', auto_correct: true
         broker.vm.network :private_network, ip: "#{ip_range}.220", subnet: "#{ip_range}.0/16"
         broker.vm.hostname = "brokerpwa"
+        broker.ssh.username = "vagrant"
+        broker.ssh.password = "vagrant"
+        broker.ssh.keys_only = false
         broker.vm.provider 'docker' do |d|
             d.image = "enjo/ubuntu-devbox:latest"
             d.has_ssh = true
