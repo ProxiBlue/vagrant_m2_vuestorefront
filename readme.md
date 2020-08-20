@@ -57,8 +57,8 @@ The environment starts up multiple Docker instances, for magento 2 and vueStoref
     * ```composer require divante/magento2-vsbridge-indexer```
     * ```composer require divante/magento2-vsbridge-indexer-msi:0.1.0```   
     
-    <b>NOTE:/b> Magent 2.3.5 /  Elastic 7: ```divante/magento2-vsbridge-indexer``` should be substituted with ```"divante/magento2-vsbridge-indexer": "2.x-dev"```
-    <b>NOTE:/b> Remember to set the elastic version use din the config here: https://github.com/DivanteLtd/vue-storefront-api/blob/master/config/default.json#L42 (naturally,edit your config file, not the default one)
+    NOTE: Magent 2.3.5 /  Elastic 7: ```divante/magento2-vsbridge-indexer``` should be substituted with ```"divante/magento2-vsbridge-indexer": "2.x-dev"```
+    NOTE: Remember to set the elastic version use din the config here: https://github.com/DivanteLtd/vue-storefront-api/blob/master/config/default.json#L42 (naturally,edit your config file, not the default one)
      
     * configure as per their guide, and re-index.
 * Edit the rest of vueStorefront configs, and set according to YOUR needs
