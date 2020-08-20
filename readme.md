@@ -126,15 +126,7 @@ Example: ```172.20.0.210 site1.dev.proxiblue.com.au site2.dev.proxiblue.com.au``
 
 ## Other stuff
 
-### Fetch environment
-
-* Clone this repo to your local machine
-
-All other commands are expected to be run from within this cloned folder
-
-### Start environment
-
-#### set required environment variables:
+### Required environment variables:
 
 * DEV_DOMAIN : The domain that vagrant instances will use
 * MYSQL_ROOT_PASSWORD :  password to use as root for database (optional - defaults to: root)
@@ -142,7 +134,9 @@ All other commands are expected to be run from within this cloned folder
 
 Suggest you place these into your user profile startup. (```~/bashrc```)
 
-* run on host : ```vagrant up```
+### Start entire environment
+
+* run on host : ```vagrant up --no-parallel && vagrant hostmanager --provider docker```
 
 you can now enter the environment using : ```vagrant ssh``` (this will be the magento docker instance)
 
