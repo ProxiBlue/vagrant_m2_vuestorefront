@@ -115,14 +115,14 @@ RUN wget https://phar.phpunit.de/phpunit.phar && /bin/chmod a+rwx phpunit.phar &
 mv phpunit.phar /usr/local/bin/phpunit.phar && \
 echo "client_max_body_size 20M;" >>/etc/nginx/conf.d/client_max_body_size.conf && \
 echo "vagrant ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_vagrant
-ADD common/php-fpm/* /etc/php/7.2/fpm/pool.d/
-RUN rm -rf /etc/php/7.2/fpm/pool.d/www.conf && mkdir /run/php && rm /etc/nginx/sites-enabled/default
+ADD common/php-fpm/* /etc/php/7.3/fpm/pool.d/
+RUN rm -rf /etc/php/7.3/fpm/pool.d/www.conf && mkdir /run/php && rm /etc/nginx/sites-enabled/default
 ADD common/.inputrc /home/vagrant/
 ADD common/nginx/* /etc/nginx/snippets/
 ADD common/nginx/ssl/certs/* /etc/ssl/certs/
 ADD common/nginx/ssl/private/* /etc/ssl/private/
 ADD common/nginx/magento /etc/nginx/sites-available/
-ADD common/xdebug.ini /etc/php/7.2/mods-available/xdebug.ini
+ADD common/xdebug.ini /etc/php/7.3/mods-available/xdebug.ini
 ADD common/supervisord* /etc/supervisor/conf.d/
 
 ADD https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip /tmp/ngrok-stable-linux-amd64.zip
