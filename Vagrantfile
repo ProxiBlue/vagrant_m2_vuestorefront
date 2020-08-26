@@ -9,7 +9,7 @@ dev_domain = ENV['DEV_DOMAIN'] || 'enjo.test'
 mysql_password = ENV['MYSQL_ROOT_PASSWORD'] || "root"
 persistent_storage = vagrant_root + '/persistent_storage'
 mode = ENV['VAGRANT_MODE'] || 'dev'
-ip_range = "172.23.1"
+ip_range = ENV['DEV_IP_RANGE'] || "172.23.1"
 
 puts "========================================================"
 puts "domain : #{dev_domain}"
