@@ -14,6 +14,7 @@ RUN useradd -G www-data --create-home --shell /bin/bash vagrant && \
     DEBIAN_FRONTEND=noninteractive && \
     echo "Australia/Perth" tee /etc/timezone && \
     dpkg-reconfigure --frontend noninteractive tzdata && \
+    apt-add-repository ppa:ondrej/php && \
     apt-get update && apt -y upgrade && sudo apt remove cmdtest && \
     apt-get -y --allow-unauthenticated --no-install-recommends install \
         bzip2 \
@@ -30,22 +31,22 @@ RUN useradd -G www-data --create-home --shell /bin/bash vagrant && \
         git \
         mc \
         nginx \
-        php7.2-fpm \
-        php7.2-cli \
-        php7.2-mysql \
-        php7.2-curl \
-        php7.2-gd \
-        php7.2-redis \
-        php7.2-xml \
-        php7.2-soap \
-        php7.2-mbstring \
-        php7.2-zip \
-        php7.2-common \
-        php7.2-intl \
-        php7.2-xsl \
-        php7.2-bcmath \
-        php7.2-iconv \
-        php7.2-intl \
+        php7.3-fpm \
+        php7.3-cli \
+        php7.3-mysql \
+        php7.3-curl \
+        php7.3-gd \
+        php7.3-redis \
+        php7.3-xml \
+        php7.3-soap \
+        php7.3-mbstring \
+        php7.3-zip \
+        php7.3-common \
+        php7.3-intl \
+        php7.3-xsl \
+        php7.3-bcmath \
+        php7.3-iconv \
+        php7.3-intl \
         php-xdebug \
         redis-server \
         ruby-dev \

@@ -3,7 +3,7 @@ map $http_host $MAGE_RUN_CODE {
 }
 
 upstream fastcgi_backend {
-    server  unix:/run/php/php7.2-fpm-magento.sock;
+    server  unix:/run/php/php7.3-fpm-magento.sock;
 }
 
 server {

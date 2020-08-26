@@ -296,7 +296,7 @@ Vagrant.configure('2') do |config|
 
     if File.exist?("#{vagrant_root}/reverseproxy/nginx.conf")
         config.vm.define "reverseproxy", primary: false do |reverseproxy|
-            reverseproxy.hostmanager.aliases = [ "reverseproxy."+dev_domain, "api."+dev_domain  ]
+            reverseproxy.hostmanager.aliases = [ "www."+dev_domain, "reverseproxy."+dev_domain, "api."+dev_domain  ]
             reverseproxy.vm.network :private_network, ip: "#{ip_range}.210", subnet: "#{ip_range}.0/16"
             reverseproxy.vm.network "forwarded_port", guest: 22, host: Random.new.rand(1000...5000), id: 'ssh', auto_correct: true
             reverseproxy.vm.hostname = "reverseproxy"
