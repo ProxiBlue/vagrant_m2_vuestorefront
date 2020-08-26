@@ -116,7 +116,7 @@ mv phpunit.phar /usr/local/bin/phpunit.phar && \
 echo "client_max_body_size 20M;" >>/etc/nginx/conf.d/client_max_body_size.conf && \
 echo "vagrant ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_vagrant
 ADD common/php-fpm/* /etc/php/7.3/fpm/pool.d/
-RUN rm -rf /etc/php/7.3/fpm/pool.d/www.conf && mkdir /run/php && rm /etc/nginx/sites-enabled/default
+RUN rm -rf /etc/php/7.3/fpm/pool.d/www.conf && mkdir -p /run/php && rm /etc/nginx/sites-enabled/default
 ADD common/.inputrc /home/vagrant/
 ADD common/nginx/* /etc/nginx/snippets/
 ADD common/nginx/ssl/certs/* /etc/ssl/certs/
