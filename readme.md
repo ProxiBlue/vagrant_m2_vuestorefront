@@ -16,6 +16,7 @@ This is a local development environment, to make working with magento 2 and vueS
 ## Layout / Structure
 
 The environment starts up multiple Docker instances, for magento 2 and vueStorefront, with known fixed ips
+You can set the base IP range in teh Vagrant file. example: ip_range = "172.20.0"
 
 * magento : 172.20.0.200 
 * redis : 172.20.0.201 
