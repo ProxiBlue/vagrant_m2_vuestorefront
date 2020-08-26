@@ -5,7 +5,7 @@ startSSHPort = 2250
 # Generate a random port number
 # fixes issue where two boxes try and map port 22, if you run multiple vagrant environments in one host
 vagrant_root = File.dirname(__FILE__)
-dev_domain = 'enjo.test'
+dev_domain = ENV['DEV_DOMAIN'] || 'enjo.test'
 mysql_password = ENV['MYSQL_ROOT_PASSWORD'] || "root"
 persistent_storage = vagrant_root + '/persistent_storage'
 mode = ENV['VAGRANT_MODE'] || 'dev'

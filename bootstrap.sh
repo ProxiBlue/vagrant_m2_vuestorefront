@@ -13,6 +13,7 @@ source /home/vagrant/git-completion.bash
 envsubst '${DEV_DOMAIN} ${WEB_IP}' < /tmp/magento.nginx.conf > /etc/nginx/sites-enabled/magento
 
 service nginx stop
+sleep 5
 service nginx start
 
 ## to start a debug session for CLI
