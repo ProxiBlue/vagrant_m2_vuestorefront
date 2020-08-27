@@ -20,10 +20,8 @@ You can set the base IP range in teh Vagrant file. example: ip_range = "172.20.0
 
 * magento : 172.20.0.200 
 * redis : 172.20.0.201 
-* elasticsearchm2 : 172.20.0.202 (for use in m2)
-* rabbitmq : 172.20.0.203 (for use in m2)
-* database : 172.20.0.208 (for use in m2)
-* elasticsearch : 172.20.0.204
+* elasticsearch : 172.20.0.202
+* database : 172.20.0.208 
 * kibana : 172.20.0.205
 * vueapi : 172.20.0.206
 * vuestorefront : 172.20.0.207 
@@ -46,22 +44,18 @@ You can set the base IP range in teh Vagrant file. example: ip_range = "172.20.0
 * then ```exit``` to exit vagrant, and reload ```vagrant reload magento``` (will now start without error)
 * browse to ```https://magento.<THE DEV DOMAIN YOU USE>``` and install magento 2. The database server will be ```database.<YOUR DOMAIN>```
     * you might want to install sample data: https://devdocs.magento.com/guides/v2.3/install-gde/install/cli/install-cli-sample-data.html
-* copy the vue config files to the overlay folder: (these actions are run on the HOST) I keep the overlay folder as a seperate GIT repo, so it can be checked out on a new setup.
-    * ```mkdir -p ./vuestorefront-config-overlay/vue-storefront-api/config/```
-    * ```cp -xav ./sites/vue-storefront-api/config/default.json ./vuestorefront-config-overlay/vue-storefront-api/config/local.json```
-    * ```mkdir -p ./vuestorefront-config-overlay/vue-storefront/config/```
-    * ```cp -xav ./sites/vue-storefront/config/default.json ./vuestorefront-config-overlay/vue-storefront/config/local.json```    
-* Follow this guide, and setup magento OAuth keys: https://docs.vuestorefront.io/guide/installation/magento.html (remember, you will edit the OVERLAY CONFIGS)
+* Follow this guide, and setup magento OAuth keys: https://docs.vuestorefront.io/guide/installation/magento.html 
     * you want to stop here: ```yarn mage2vs import``` - you only want to do the OAuth keys, not the import, that is the next step!
 * Install https://github.com/DivanteLtd/magento2-vsbridge-indexer
     * ```vagrant ssh```
     * ```composer require divante/magento2-vsbridge-indexer```
     * ```composer require divante/magento2-vsbridge-indexer-msi:0.1.0```   
     
-    NOTE: Magent 2.3.5 /  Elastic 7: ```divante/magento2-vsbridge-indexer``` should be substituted with ```"divante/magento2-vsbridge-indexer": "2.x-dev"```
+    NOTE: Magent 2.3.5 /  Elasticsearch 7: ```divante/magento2-vsbridge-indexer``` should be substituted with ```"divante/magento2-vsbridge-indexer": "2.x-dev"```
     NOTE: Remember to set the elastic version use din the config here: https://github.com/DivanteLtd/vue-storefront-api/blob/master/config/default.json#L42 (naturally,edit your config file, not the default one)
      
     * configure as per their guide, and re-index.
+    
 * Edit the rest of vueStorefront configs, and set according to YOUR needs
     * Note that you can set the following, in accordance to this environment: 
         * redis host: ```redis```
@@ -227,22 +221,16 @@ You can access ngrok admin port on 172.20.0.200:4040
 * mysql -u root -p -h database
 * OR use a GUI client form your HOST, and access database via port 3306
 
-#### The config overlay folder
+#### The config overlay
 
-Since you require custom config for vueStoreFront, you can place the appropriate local.json config files in the folder ```vuestorefront-config-overlay```, ensuring the path matches that of the parent config.
+Since you require custom config for vueStoreFront, you can place the appropriate local.json config files in the vuesf config folder, named ```local.json.dev```
 
 Example:
 
-To configure a local.json for vue-storefront-api, which has its config located now in ```sites/vue-storefront-api/config/default.json``` place your local.json file in ```vuestorefront-config-overlay/vue-storefront-api/config/local.json```
-
-Basically, and files placed in the overlay folder, matching the `parent` config folder structure, will be used instead of the `parent`
-The files here are excluded from this GIT repo.
-It is advised that you create a git sub-module here, so you can commit yor custom configs, and not loose them!
-
 #### Custom bootstrap.sh
 
-Lets say there is something you would like to adjust in the main startup of the magento docker instance.
-Example, this could be a modified nginx config file, or you would like to install some package that you use.
+Let's say there is something you would like to adjust in the main startup of the magento docker instance.
+Example, this could be a modified nginx config file, or you would like to install some package you use.
 So, rather than having to build your own docker image, you can place a custom bootstrap.sh file located in ```provision``` folder.
 If that exists, it will be run, as root, on the magento docker instance (only)
 Handy for developers who want to tweak a thing or two.

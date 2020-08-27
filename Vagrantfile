@@ -143,11 +143,10 @@ Vagrant.configure('2') do |config|
             trigger.name = "overlay config"
             # Check if vue local.json config exists, and copy it to the vue config folder
             # any edits must be made in teh overlay file. Edits in teh destination file will be overwritten
-            config_file="local.json"
-            if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront-api/config/#{config_file}")
-                FileUtils.copy_file("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront-api/config/#{config_file}",
+            if File.exist?("#{vagrant_root}/sites/vue-storefront-api/config/local.json.dev")
+                FileUtils.copy_file("#{vagrant_root}/sites/vue-storefront-api/config/local.json.dev",
                 "#{vagrant_root}/sites/vue-storefront-api/config/local.json")
-                trigger.info = "Found overlay #{config_file}. It was copied to the base vue config folder."
+                trigger.info = "local.json.dev was copied to local.json"
             end
             # check that the /tmp/vueapi folder exists (which is used to simulated the tmpfs setup as per vue composer files
             if File.directory?("/tmp/vueapi")
@@ -158,8 +157,8 @@ Vagrant.configure('2') do |config|
             trigger.ignore = [:destroy, :halt]
         end
 
-        if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront-api/boot.sh")
-                vueapi.vm.provision "shell", path: "#{vagrant_root}/vuestorefront-config-overlay/vue-storefront-api/boot.sh", privileged: true
+         if File.exist?("#{vagrant_root}/vsf_boot.sh")
+                vuestorefront.vm.provision "shell", path: "#{vagrant_root}/vsf_boot.sh", privileged: true
         end
 
         vueapi.vm.network :private_network, ip: "#{ip_range}.206", subnet: "#{ip_range}.0/16"
@@ -202,11 +201,10 @@ Vagrant.configure('2') do |config|
             trigger.name = "overlay config"
             # Check if vue local.json config exists, and copy it to the vue config folder
             # any edits must be made in teh overlay file. Edits in teh destination file will be overwritten
-            config_file="local.json"
-            if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront/config/#{config_file}")
-                FileUtils.copy_file("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront/config/#{config_file}",
+            if File.exist?("#{vagrant_root}/sites/vue-storefront/config/local.json.dev")
+                FileUtils.copy_file("#{vagrant_root}/sites/vue-storefront/config/local.json.dev",
                 "#{vagrant_root}/sites/vue-storefront/config/local.json")
-                trigger.info = "Found overlay #{config_file}. It was copied to the base vue config folder."
+                trigger.info = "local.json.dev was copied to local.json"
             end
             # check that the /tmp/vuestorefront folder exists (which is used to simulated teh tmpfs setup as per vue composer files
             if File.directory?("/tmp/vuestorefront")
@@ -216,8 +214,8 @@ Vagrant.configure('2') do |config|
             end
             trigger.ignore = [:destroy, :halt]
         end
-        if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/vue-storefront/boot.sh")
-                vuestorefront.vm.provision "shell", path: "#{vagrant_root}/vuestorefront-config-overlay/vue-storefront/boot.sh", privileged: true
+        if File.exist?("#{vagrant_root}/vsf_boot.sh")
+                vuestorefront.vm.provision "shell", path: "#{vagrant_root}/vsf_boot.sh", privileged: true
         end
         vuestorefront.vm.network :private_network, ip: "#{ip_range}.207", subnet: "#{ip_range}.0/16"
         vuestorefront.vm.network "forwarded_port", guest: 22, host: Random.new.rand(1000...5000), id: 'ssh', auto_correct: true
