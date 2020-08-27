@@ -87,6 +87,7 @@ Vagrant.configure('2') do |config|
         redis.hostmanager.aliases = [ "redis."+dev_domain ]
         redis.vm.network :private_network, ip: "#{ip_range}.201", subnet: "#{ip_range}.0/16"
         redis.vm.hostname = "redispwa"
+        redis.vm.communicator = 'docker'
         redis.vm.provider 'docker' do |d|
             d.image = "redis:latest"
             d.has_ssh = false
@@ -96,57 +97,18 @@ Vagrant.configure('2') do |config|
     end
 
     config.vm.define "elasticsearchm2", primary: false do |elasticsearchm2|
-        elasticsearchm2.hostmanager.aliases = [ "elasticsearchm2."+dev_domain ]
+        elasticsearchm2.hostmanager.aliases = [ "elasticsearchm2."+dev_domain, "elasticsearch."+dev_domain ]
         elasticsearchm2.vm.network :private_network, ip: "#{ip_range}.202", subnet: "#{ip_range}.0/16"
         elasticsearchm2.vm.hostname = "elasticsearchm2pwa"
+        elasticsearchm2.vm.communicator = 'docker'
         elasticsearchm2.vm.provider 'docker' do |d|
-            d.image = "docker.elastic.co/elasticsearch/elasticsearch:6.8.3"
+            d.image = "docker.elastic.co/elasticsearch/elasticsearch:7.8.0"
             d.has_ssh = false
             d.name = "elasticsearchm2pwa"
             d.remains_running = true
             d.volumes = [
                 "#{persistent_storage}/elasticsearchm2:/usr/share/elasticsearch/data"
             ]
-        end
-    end
-
-    config.vm.define "rabbitmq", primary: false do |rabbitmq|
-        rabbitmq.hostmanager.aliases = [ "rabbitmq."+dev_domain ]
-        rabbitmq.vm.network :private_network, ip: "#{ip_range}.203", subnet: "#{ip_range}.0/16"
-        rabbitmq.vm.hostname = "rabbitmqpwa"
-        rabbitmq.vm.provider 'docker' do |d|
-            d.image = "rabbitmq:latest"
-            d.has_ssh = false
-            d.name = "rabbitmqpwa"
-            d.remains_running = true
-        end
-    end
-
-    config.vm.define "elasticsearch", primary: false do |elasticsearch|
-        elasticsearch.hostmanager.aliases = [ "elasticsearch."+dev_domain ]
-        vue_elastic_config="#{vagrant_root}/sites/vue-storefront-api/docker/elasticsearch/config/elasticsearch.yml"
-        elasticsearch.trigger.before :all do |trigger|
-            trigger.name = "overlay config"
-            # Check if overlay config for elastic search exists.
-            if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/elasticsearch/config/elasticsearch.yml")
-                vue_elastic_config="#{vagrant_root}/vuestorefront-config-overlay/elasticsearch/config/elasticsearch.yml"
-                trigger.info = "Found overlay config: #{vue_elastic_config}"
-            end
-            trigger.ignore = [:destroy, :halt]
-        end
-        elasticsearch.vm.network :private_network, ip: "#{ip_range}.204", subnet: "#{ip_range}.0/16"
-        elasticsearch.vm.hostname = "elasticsearchpwa"
-        elasticsearch.vm.provider 'docker' do |d|
-            d.build_dir = "#{vagrant_root}/sites/vue-storefront-api/docker/elasticsearch"
-            d.dockerfile = "Dockerfile"
-            d.has_ssh = false
-            d.name = "elasticsearchpwa"
-            d.remains_running = true
-            d.volumes = [
-                "#{vue_elastic_config}:/usr/share/elasticsearch/config/elasticsearch.yml:ro",
-                "#{persistent_storage}/elasticsearch:/usr/share/elasticsearch/data"
-                ]
-            d.env =  { "ES_JAVA_OPTS" => "-Xmx512m -Xms512m" }
         end
     end
 
