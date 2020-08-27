@@ -1,0 +1,17 @@
+discovery.type: "single-node"
+cluster.name: "enjo-cluster"
+network.host: 0.0.0.0
+
+# custom config
+node.name: "node-1"
+discovery.seed_hosts: ["127.0.0.1", "[::1]"]
+cluster.initial_master_nodes: ["node-1"]
+# Enable cross-domain access support, the default is false
+http.cors.enabled: true
+# Cross-domain access allowed domain name address, (allow all domain names) above the use of regular
+http.cors.allow-origin: /.*/
+path.data: /var/lib/elasticsearch
+path.logs: /var/log/elasticsearch
+
+index:
+  codec: "best_compression"

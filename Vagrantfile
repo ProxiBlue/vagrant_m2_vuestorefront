@@ -10,6 +10,7 @@ mysql_password = ENV['MYSQL_ROOT_PASSWORD'] || "root"
 persistent_storage = vagrant_root + '/persistent_storage'
 mode = ENV['VAGRANT_MODE'] || 'dev'
 ip_range = ENV['DEV_IP_RANGE'] || "172.23.1"
+dev_suffix = ENV['DEV_SUFFIX'] || "dev"
 
 puts "========================================================"
 puts "domain : #{dev_domain}"
@@ -18,11 +19,13 @@ puts "mysql root password : #{mysql_password}"
 puts "mode: #{mode}"
 puts "persistent storage: #{persistent_storage}"
 puts "ip range used: #{ip_range}"
+puts "dev suffix: #{dev_suffix}"
 puts "========================================================"
 
 FileUtils.mkdir_p(persistent_storage)
 FileUtils.mkdir_p(persistent_storage+"/mysql")
-FileUtils.mkdir_p(persistent_storage+"/elasticsearchm2")
+FileUtils.mkdir_p(persistent_storage+"/elasticsearch")
+FileUtils.chmod 0777, persistent_storage+"/elasticsearch";
 
 Vagrant.configure('2') do |config|
     config.vm.boot_timeout = 1800
@@ -94,59 +97,37 @@ Vagrant.configure('2') do |config|
         end
     end
 
-    config.vm.define "elasticsearchm2", primary: false do |elasticsearchm2|
-        elasticsearchm2.hostmanager.aliases = [ "elasticsearchm2."+dev_domain, "elasticsearch."+dev_domain ]
-        elasticsearchm2.vm.network :private_network, ip: "#{ip_range}.202", subnet: "#{ip_range}.0/16"
-        elasticsearchm2.vm.hostname = "elasticsearchm2pwa"
-        elasticsearchm2.vm.communicator = 'docker'
-        elasticsearchm2.vm.provider 'docker' do |d|
-            d.image = "docker.elastic.co/elasticsearch/elasticsearch:7.8.0"
-            d.has_ssh = false
-            d.name = "elasticsearchm2pwa"
-            d.remains_running = true
-            d.volumes = [
-                "#{persistent_storage}/elasticsearchm2:/usr/share/elasticsearch/data"
-            ]
-        end
-    end
+    config.vm.define "elasticsearch", primary: false do |elasticsearch|
+        elasticsearch.hostmanager.aliases = [ "elasticsearchm2."+dev_domain, "elasticsearch."+dev_domain ]
+        elasticsearch.vm.network :private_network, ip: "#{ip_range}.202", subnet: "#{ip_range}.0/16"
+        elasticsearch.vm.hostname = "elasticsearchpwa"
+        elasticsearch.vm.communicator = 'docker'
+        #elasticsearch.vm.provision "file", source: "#{vagrant_root}/elasticsearch.yml", destination: "/etc/elasticsearch/elasticsearch.yml"
 
-    config.vm.define "kibana", primary: false do |kibana|
-        kibana.hostmanager.aliases =  [ "kibana."+dev_domain ]
-        vue_kibana_config="#{vagrant_root}/sites/vue-storefront-api/docker/kibana/config/"
-        kibana.trigger.before :all do |trigger|
-            trigger.name = "overlay config"
-            # Check if overlay config for kibana exists.
-            if File.exist?("#{vagrant_root}/vuestorefront-config-overlay/kibana/config/kibana.yml")
-                vue_kibana_config="#{vagrant_root}/vuestorefront-config-overlay/kibana/config/"
-                trigger.info = "Found overlay config: #{vue_kibana_config}"
-            end
-            trigger.ignore = [:destroy, :halt]
-        end
-        kibana.vm.network "forwarded_port", guest: 22, host: Random.new.rand(1000...5000), id: 'ssh', auto_correct: true
-        kibana.vm.network :private_network, ip: "#{ip_range}.205", subnet: "#{ip_range}.0/16"
-        kibana.vm.hostname = "kibanapwa"
-        kibana.vm.communicator = 'docker'
-        kibana.vm.provider 'docker' do |d|
-            d.image = "docker.elastic.co/kibana/kibana:7.8.0"
-            d.has_ssh = false
-            d.name = "kibanapwa"
+        elasticsearch.vm.provider 'docker' do |d|
+            d.image = "docker.elastic.co/elasticsearch/elasticsearch:7.8.0"
+            d.has_ssh = true
+            d.name = "elasticsearchpwa"
             d.remains_running = true
             d.volumes = [
-                "#{vue_kibana_config}:/usr/share/kibana/config:ro"
-                ]
+                "#{persistent_storage}/elasticsearch:/usr/share/elasticsearch/data",
+                "#{vagrant_root}/elasticsearch.yml:/etc/elasticsearch/elasticsearch.yml"
+            ]
+            d.env = { "discovery.type" => "single-node" }
         end
     end
 
     config.vm.define "vueapi", primary: false do |vueapi|
         vueapi.hostmanager.aliases = [ "vueapi."+dev_domain ]
+        vueapi.communicator.bash_shell = '/bin/sh';
         vueapi.trigger.before :all do |trigger|
             trigger.name = "overlay config"
             # Check if vue local.json config exists, and copy it to the vue config folder
             # any edits must be made in teh overlay file. Edits in teh destination file will be overwritten
-            if File.exist?("#{vagrant_root}/sites/vue-storefront-api/config/local.json.dev")
-                FileUtils.copy_file("#{vagrant_root}/sites/vue-storefront-api/config/local.json.dev",
+            if File.exist?("#{vagrant_root}/sites/vue-storefront-api/config/local.json.#{dev_suffix}")
+                FileUtils.copy_file("#{vagrant_root}/sites/vue-storefront-api/config/local.json.#{dev_suffix}",
                 "#{vagrant_root}/sites/vue-storefront-api/config/local.json")
-                trigger.info = "local.json.dev was copied to local.json"
+                trigger.info = "local.json.#{dev_suffix} was copied to local.json"
             end
             # check that the /tmp/vueapi folder exists (which is used to simulated the tmpfs setup as per vue composer files
             if File.directory?("/tmp/vueapi")
@@ -158,7 +139,7 @@ Vagrant.configure('2') do |config|
         end
 
          if File.exist?("#{vagrant_root}/vsf_boot.sh")
-                vuestorefront.vm.provision "shell", path: "#{vagrant_root}/vsf_boot.sh", privileged: true
+                vueapi.vm.provision "shell", path: "#{vagrant_root}/vsf_boot.sh", privileged: true
         end
 
         vueapi.vm.network :private_network, ip: "#{ip_range}.206", subnet: "#{ip_range}.0/16"
@@ -167,7 +148,7 @@ Vagrant.configure('2') do |config|
         vueapi.vm.provider 'docker' do |d|
             d.build_dir = "#{vagrant_root}/sites/vue-storefront-api/"
             d.dockerfile = "docker/vue-storefront-api/Dockerfile"
-            d.has_ssh = true
+            d.has_ssh = false
             d.name = "vueapi"
             d.remains_running = true
             d.volumes = [
@@ -195,16 +176,17 @@ Vagrant.configure('2') do |config|
     end
 
     config.vm.define "vuestorefront", primary: false do |vuestorefront|
+        vuestorefront.communicator.bash_shell = '/bin/sh';
         vuestorefront.hostmanager.enabled = true
         vuestorefront.hostmanager.aliases =  [ "vuestorefront."+dev_domain ]
         vuestorefront.trigger.before :all do |trigger|
             trigger.name = "overlay config"
             # Check if vue local.json config exists, and copy it to the vue config folder
             # any edits must be made in teh overlay file. Edits in teh destination file will be overwritten
-            if File.exist?("#{vagrant_root}/sites/vue-storefront/config/local.json.dev")
-                FileUtils.copy_file("#{vagrant_root}/sites/vue-storefront/config/local.json.dev",
+            if File.exist?("#{vagrant_root}/sites/vue-storefront/config/local.json.#{dev_suffix}")
+                FileUtils.copy_file("#{vagrant_root}/sites/vue-storefront/config/local.json.#{dev_suffix}",
                 "#{vagrant_root}/sites/vue-storefront/config/local.json")
-                trigger.info = "local.json.dev was copied to local.json"
+                trigger.info = "local.json.#{dev_suffix} was copied to local.json"
             end
             # check that the /tmp/vuestorefront folder exists (which is used to simulated teh tmpfs setup as per vue composer files
             if File.directory?("/tmp/vuestorefront")
@@ -224,7 +206,7 @@ Vagrant.configure('2') do |config|
         vuestorefront.vm.provider 'docker' do |d|
             d.build_dir = "#{vagrant_root}/sites/vue-storefront/"
             d.dockerfile = "docker/vue-storefront/Dockerfile"
-            d.has_ssh = true
+            d.has_ssh = false
             d.name = "vuestorefront"
             d.remains_running = true
             d.volumes = [
