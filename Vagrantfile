@@ -23,8 +23,6 @@ puts "========================================================"
 FileUtils.mkdir_p(persistent_storage)
 FileUtils.mkdir_p(persistent_storage+"/mysql")
 FileUtils.mkdir_p(persistent_storage+"/elasticsearchm2")
-FileUtils.mkdir_p(persistent_storage+"/elasticsearch")
-
 
 Vagrant.configure('2') do |config|
     config.vm.boot_timeout = 1800
@@ -129,9 +127,8 @@ Vagrant.configure('2') do |config|
         kibana.vm.hostname = "kibanapwa"
         kibana.vm.communicator = 'docker'
         kibana.vm.provider 'docker' do |d|
-            d.build_dir = "#{vagrant_root}/sites/vue-storefront-api/docker/kibana"
-            d.dockerfile = "Dockerfile"
-            d.has_ssh = true
+            d.image = "docker.elastic.co/kibana/kibana:7.8.0"
+            d.has_ssh = false
             d.name = "kibanapwa"
             d.remains_running = true
             d.volumes = [
