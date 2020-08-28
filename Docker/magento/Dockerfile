@@ -92,6 +92,7 @@ RUN useradd -G www-data --create-home --shell /bin/bash vagrant && \
 
 ADD https://raw.githubusercontent.com/mitchellh/vagrant/master/keys/vagrant.pub /home/vagrant/.ssh/authorized_keys
 ADD common/wrap_chrome_binary /tmp/
+
 RUN bash /tmp/wrap_chrome_binary && \
 export CD_VERSION=$(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE) \
   && echo "Using chromedriver version: "$CD_VERSION \
@@ -121,7 +122,6 @@ ADD common/.inputrc /home/vagrant/
 ADD common/nginx/* /etc/nginx/snippets/
 ADD common/nginx/ssl/certs/* /etc/ssl/certs/
 ADD common/nginx/ssl/private/* /etc/ssl/private/
-ADD common/nginx/magento /etc/nginx/sites-enabled/
 ADD common/xdebug.ini /etc/php/7.3/mods-available/xdebug.ini
 ADD common/supervisord* /etc/supervisor/conf.d/
 

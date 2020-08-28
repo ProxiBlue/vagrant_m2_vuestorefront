@@ -39,7 +39,7 @@ Vagrant.configure('2') do |config|
     end
     config.vm.define "magento", primary: true do |magento|
         magento.hostmanager.aliases = [ "magento."+dev_domain ]
-        magento.vm.provision "file", source: "#{vagrant_root}/magento.nginx.conf", destination: "/tmp/magento.nginx.conf"
+        magento.vm.provision "file", source: "#{vagrant_root}/magento.nginx.conf", destination: "/tmp/magento"
         magento.vm.provision "shell" do |s|
             s.path = "bootstrap.sh"
             s.args = "#{dev_domain} #{ip_range}.200"
