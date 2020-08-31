@@ -37,6 +37,27 @@ Vagrant.configure('2') do |config|
     config.trigger.after :up do |trigger|
       trigger.run = {inline: "bash -c 'vagrant hostmanager --provider docker'"}
     end
+
+    if File.exist?("#{vagrant_root}/reverseproxy/nginx.conf")
+        config.vm.define "reverseproxy", primary: false do |reverseproxy|
+            reverseproxy.hostmanager.aliases = [ "www."+dev_domain, "reverseproxy."+dev_domain, "api."+dev_domain  ]
+            reverseproxy.vm.network :private_network, ip: "#{ip_range}.210", subnet: "#{ip_range}.0/16"
+            reverseproxy.vm.network "forwarded_port", guest: 22, host: Random.new.rand(1000...5000), id: 'ssh', auto_correct: true
+            reverseproxy.vm.hostname = "reverseproxy"
+            reverseproxy.vm.communicator = 'docker'
+            reverseproxy.vm.provider 'docker' do |d|
+                d.image = "nginx:latest"
+                d.has_ssh = true
+                d.name = "reverseproxy"
+                d.remains_running = true
+                d.volumes = [
+                    "#{vagrant_root}/reverseproxy/nginx.conf:/etc/nginx/nginx.conf:ro",
+                    "#{vagrant_root}/Docker/magento/common/nginx/ssl:/etc/nginx/ssl"
+                ]
+            end
+        end
+    end
+
     config.vm.define "magento", primary: true do |magento|
         magento.hostmanager.aliases = [ "magento."+dev_domain ]
         magento.vm.provision "file", source: "#{vagrant_root}/magento.nginx.conf", destination: "/tmp/magento"
@@ -114,6 +135,24 @@ Vagrant.configure('2') do |config|
                 "#{vagrant_root}/elasticsearch.yml:/etc/elasticsearch/elasticsearch.yml"
             ]
             d.env = { "discovery.type" => "single-node" }
+        end
+    end
+
+    config.vm.define "kibana", primary: false do |kibana|
+        kibana.hostmanager.aliases =  [ "kibana."+dev_domain ]
+        kibana.vm.network "forwarded_port", guest: 22, host: Random.new.rand(1000...5000), id: 'ssh', auto_correct: true
+        kibana.vm.network :private_network, ip: "#{ip_range}.205", subnet: "#{ip_range}.0/16"
+        kibana.vm.hostname = "kibanapwa"
+        kibana.vm.communicator = 'docker'
+        kibana.vm.provider 'docker' do |d|
+            d.image = "docker.elastic.co/kibana/kibana:7.8.0"
+            d.has_ssh = true
+            d.name = "kibanapwa"
+            d.remains_running = true
+            d.env = {
+                "ELASTICSEARCH_URL" => "http://elasticsearch."+dev_domain+":9200",
+                "ELASTICSEARCH_HOSTS" => "http://elasticsearch."+dev_domain+":9200"
+            }
         end
     end
 
@@ -230,26 +269,6 @@ Vagrant.configure('2') do |config|
                       "PM2_ARGS" => "--no-daemon",
                       "NODE_TLS_REJECT_UNAUTHORIZED" => "0"
                     }
-        end
-    end
-
-    if File.exist?("#{vagrant_root}/reverseproxy/nginx.conf")
-        config.vm.define "reverseproxy", primary: false do |reverseproxy|
-            reverseproxy.hostmanager.aliases = [ "www."+dev_domain, "reverseproxy."+dev_domain, "api."+dev_domain  ]
-            reverseproxy.vm.network :private_network, ip: "#{ip_range}.210", subnet: "#{ip_range}.0/16"
-            reverseproxy.vm.network "forwarded_port", guest: 22, host: Random.new.rand(1000...5000), id: 'ssh', auto_correct: true
-            reverseproxy.vm.hostname = "reverseproxy"
-            reverseproxy.vm.communicator = 'docker'
-            reverseproxy.vm.provider 'docker' do |d|
-                d.image = "nginx:latest"
-                d.has_ssh = true
-                d.name = "reverseproxy"
-                d.remains_running = true
-                d.volumes = [
-                    "#{vagrant_root}/reverseproxy/nginx.conf:/etc/nginx/nginx.conf:ro",
-                    "#{vagrant_root}/Docker/magento/common/nginx/ssl:/etc/nginx/ssl"
-                ]
-            end
         end
     end
 
