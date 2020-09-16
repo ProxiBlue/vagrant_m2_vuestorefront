@@ -5,12 +5,12 @@ startSSHPort = 2250
 # Generate a random port number
 # fixes issue where two boxes try and map port 22, if you run multiple vagrant environments in one host
 vagrant_root = File.dirname(__FILE__)
-dev_domain = ENV['DEV_DOMAIN'] || 'enjo.test'
+dev_domain = ENV['ENJO_DEV_DOMAIN'] || 'enjo.test'
 mysql_password = ENV['MYSQL_ROOT_PASSWORD'] || "root"
 persistent_storage = vagrant_root + '/persistent_storage'
 mode = ENV['VAGRANT_MODE'] || 'dev'
 ip_range = ENV['DEV_IP_RANGE'] || "172.23.1"
-dev_suffix = ENV['DEV_SUFFIX'] || "dev"
+dev_suffix = ENV['DEV_SUFFIX'] || "local"
 
 puts "========================================================"
 puts "domain : #{dev_domain}"
@@ -204,9 +204,9 @@ Vagrant.configure('2') do |config|
                 "/tmp/vueapi:/var/www/dist"
                 ]
             d.env = { "BIND_HOST" => "0.0.0.0",
-                      "ELASTICSEARCH_HOST" => "elasticsearch",
+                      "ELASTICSEARCH_HOST" => "elasticsearch."+dev_domain,
                       "ELASTICSEARCH_PORT" => "9200",
-                      "REDIS_HOST" => "redis",
+                      "REDIS_HOST" => "redis."+dev_domain,
                       "VS_ENV" => "#{mode}",
                       "PM2_ARGS" => "--no-daemon",
                       "NODE_TLS_REJECT_UNAUTHORIZED" => "0"
@@ -222,8 +222,8 @@ Vagrant.configure('2') do |config|
             trigger.name = "overlay config"
             # Check if vue local.json config exists, and copy it to the vue config folder
             # any edits must be made in teh overlay file. Edits in teh destination file will be overwritten
-            if File.exist?("#{vagrant_root}/sites/vue-storefront/config/local.json.#{dev_suffix}")
-                FileUtils.copy_file("#{vagrant_root}/sites/vue-storefront/config/local.json.#{dev_suffix}",
+            if File.exist?("#{vagrant_root}/sites/vue-storefront/config/local.json.local")
+                FileUtils.copy_file("#{vagrant_root}/sites/vue-storefront/config/local.json.local",
                 "#{vagrant_root}/sites/vue-storefront/config/local.json")
                 trigger.info = "local.json.#{dev_suffix} was copied to local.json"
             end
