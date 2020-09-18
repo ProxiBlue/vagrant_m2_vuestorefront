@@ -40,7 +40,7 @@ You can set the base IP range in teh Vagrant file. example: ip_range = "172.20.0
 * bring up the database instance: ```vagrant up database```
 * bring up the magento instance: ```vagrant up magento``` (ignore error: The SSH command responded with a non-zero exit status)
 * ssh into instance ```vagrant ssh```, and install magento files (any way you like) example: ```composer create-project --repository=https://repo.magento.com/ magento/project-community-edition ./``` 
-* then ```mysqladmin -u root -h database -p  create magento```
+* then ```mysqladmin -u root -h database.<YOUR DOMAIN> -p  create magento``` (password = root)
 * then ```exit``` to exit vagrant, and reload ```vagrant reload magento``` (will now start without error)
 * browse to ```https://magento.<THE DEV DOMAIN YOU USE>``` and install magento 2. The database server will be ```database.<YOUR DOMAIN>```
     * you might want to install sample data: https://devdocs.magento.com/guides/v2.3/install-gde/install/cli/install-cli-sample-data.html
