@@ -11,6 +11,14 @@ This is a local development environment, to make working with magento 2 and vueS
 * Docker 18.09.7 or greater
 * vagrant plugin: https://github.com/devopsgroup-io/vagrant-hostmanager
 * vagrant plugin: ```vagrant plugin install docker-api```
+
+Update: 2020-09: I have found that on Spet 2020 docker-api released a new version 2.0.0
+Using ```Docker version 19.03.6, build 369ce74a3c``` with version 2.0.0 seems to fail with error: ```undefined method `copy' for #<Docker::Container:0x00000000034c0b50> (NoMethodError)```
+
+If you have this, install version 1.34.2 of the docker-api
+
+```vagrant plugin install docker-api --plugin-version=1.34.2```
+
 * vagrant plugin: https://github.com/ProxiBlue/vagrant-communicator-docker
 
 ## Layout / Structure
