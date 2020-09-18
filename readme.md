@@ -44,13 +44,13 @@ You can set the base IP range in teh Vagrant file. example: ip_range = "172.20.0
 * then ```exit``` to exit vagrant, and reload ```vagrant reload magento``` (will now start without error)
 * browse to ```https://magento.<THE DEV DOMAIN YOU USE>``` and install magento 2. The database server will be ```database.<YOUR DOMAIN>```
     * you might want to install sample data: https://devdocs.magento.com/guides/v2.3/install-gde/install/cli/install-cli-sample-data.html
-    * if you find you get Gateway Error, ssh into vagrant, and start php fpm (```sudo service php7.3-fpm start```)
+    * if you find you get Gateway Error, ssh into vagrant, and start php fpm (```vagrant ssh && sudo service php7.3-fpm start```)
 * Follow this guide, and setup magento OAuth keys: https://docs.vuestorefront.io/guide/installation/magento.html 
     * you want to stop here: ```yarn mage2vs import``` - you only want to do the OAuth keys, not the import, that is the next step!
 * Install https://github.com/DivanteLtd/magento2-vsbridge-indexer
     * ```vagrant ssh```
     * ```composer require divante/magento2-vsbridge-indexer```
-    * ```composer require divante/magento2-vsbridge-indexer-msi:0.1.0```   
+    * ```composer require divante/magento2-vsbridge-indexer-msi:0.2.0```   
     
     NOTE: Magent 2.3.5 /  Elasticsearch 7: ```divante/magento2-vsbridge-indexer``` should be substituted with ```"divante/magento2-vsbridge-indexer": "2.x-dev"```
     NOTE: Remember to set the elastic version use din the config here: https://github.com/DivanteLtd/vue-storefront-api/blob/master/config/default.json#L42 (naturally,edit your config file, not the default one)
