@@ -5,7 +5,7 @@ startSSHPort = 2250
 # Generate a random port number
 # fixes issue where two boxes try and map port 22, if you run multiple vagrant environments in one host
 vagrant_root = File.dirname(__FILE__)
-dev_domain = ENV['ENJO_DEV_DOMAIN'] || 'enjo.test'
+dev_domain = ENV['DEV_DOMAIN'] || 'local.test'
 mysql_password = ENV['MYSQL_ROOT_PASSWORD'] || "root"
 persistent_storage = vagrant_root + '/persistent_storage'
 mode = ENV['VAGRANT_MODE'] || 'dev'
@@ -54,14 +54,13 @@ Vagrant.configure('2') do |config|
         end
     end
 
-
     config.vm.define "database", primary: false do |database|
         database.hostmanager.aliases = [ "database."+dev_domain ]
         database.vm.network :private_network, ip: "#{ip_range}.208", subnet: "#{ip_range}.0/16"
         database.vm.hostname = "database"
         database.vm.communicator = 'docker'
         database.vm.provider 'docker' do |d|
-            d.image = "proxiblue/mysql:latest"
+            d.image = "percona/percona-server:8.0.21"
             d.has_ssh = false
             d.name = "database"
             d.remains_running = true
@@ -152,7 +151,6 @@ Vagrant.configure('2') do |config|
             d.env = { "DEV_DOMAIN" => "#{dev_domain}", "WEB_IP" => "#{dev_domain}" }
         end
     end
-
 
     config.vm.define "vueapi", primary: false do |vueapi|
         vueapi.hostmanager.aliases = [ "vueapi."+dev_domain ]
