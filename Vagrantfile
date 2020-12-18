@@ -34,13 +34,9 @@ Vagrant.configure('2') do |config|
     config.hostmanager.manage_guest = true
     config.hostmanager.ignore_private_ip = false
     config.hostmanager.include_offline = false
-    config.trigger.after :up do |trigger|
-      trigger.run = {inline: "bash -c 'vagrant hostmanager --provider docker'"}
-    end
-
     if File.exist?("#{vagrant_root}/reverseproxy/nginx.conf")
         config.vm.define "reverseproxy", primary: false do |reverseproxy|
-            reverseproxy.hostmanager.aliases = [ "www."+dev_domain, "reverseproxy."+dev_domain, "api."+dev_domain  ]
+            reverseproxy.hostmanager.aliases = [ "www."+dev_domain, "reverseproxy."+dev_domain, "api."+dev_domain, "sante."+dev_domain  ]
             reverseproxy.vm.network :private_network, ip: "#{ip_range}.210", subnet: "#{ip_range}.0/16"
             reverseproxy.vm.network "forwarded_port", guest: 22, host: Random.new.rand(1000...5000), id: 'ssh', auto_correct: true
             reverseproxy.vm.hostname = "reverseproxy"
@@ -58,37 +54,6 @@ Vagrant.configure('2') do |config|
         end
     end
 
-    config.vm.define "magento", primary: true do |magento|
-        magento.hostmanager.aliases = [ "magento."+dev_domain ]
-        magento.vm.provision "file", source: "#{vagrant_root}/magento.nginx.conf", destination: "/tmp/magento"
-        magento.vm.provision "shell" do |s|
-            s.path = "bootstrap.sh"
-            s.args = "#{dev_domain} #{ip_range}.200"
-        end
-        if File.exist?("provision/bootstrap.sh")
-            magento.vm.provision "shell" do |s|
-                s.path = "provision/bootstrap.sh"
-                s.args = "#{dev_domain} #{ip_range}.200"
-            end
-        end
-
-        magento.ssh.username = "vagrant"
-        magento.ssh.password = "vagrant"
-        magento.ssh.keys_only = false
-        magento.vm.network :private_network, ip: "#{ip_range}.200", subnet: "#{ip_range}.0/16"
-        magento.vm.network "forwarded_port", guest: 22, host: 2230, id: 'ssh', auto_correct: true
-        magento.vm.hostname = "magento"
-        magento.vm.provider 'docker' do |d|
-            d.image = "proxiblue/magento2:latest"
-            #d.build_dir = "./Docker/magento"
-            d.has_ssh = true
-            d.name = "magento"
-            d.create_args = ["--cap-add=NET_ADMIN"]
-            d.remains_running = true
-            d.volumes = ["/tmp/.X11-unix:/tmp/.X11-unix", ENV['HOME']+"/.ssh/:/home/vagrant/.ssh", ENV['HOME']+"/.composer:/home/vagrant/.composer"]
-            d.env = { "DEV_DOMAIN" => "#{dev_domain}", "WEB_IP" => "#{dev_domain}" }
-        end
-    end
 
     config.vm.define "database", primary: false do |database|
         database.hostmanager.aliases = [ "database."+dev_domain ]
@@ -155,6 +120,39 @@ Vagrant.configure('2') do |config|
             }
         end
     end
+
+    config.vm.define "magento", primary: true do |magento|
+        magento.hostmanager.aliases = [ "magento."+dev_domain, "santemagento."+dev_domain ]
+        magento.vm.provision "file", source: "#{vagrant_root}/magento.nginx.conf", destination: "/tmp/magento"
+        magento.vm.provision "shell" do |s|
+            s.path = "bootstrap.sh"
+            s.args = "#{dev_domain} #{ip_range}.200"
+        end
+        if File.exist?("provision/bootstrap.sh")
+            magento.vm.provision "shell" do |s|
+                s.path = "provision/bootstrap.sh"
+                s.args = "#{dev_domain} #{ip_range}.200"
+            end
+        end
+
+        magento.ssh.username = "vagrant"
+        magento.ssh.password = "vagrant"
+        magento.ssh.keys_only = false
+        magento.vm.network :private_network, ip: "#{ip_range}.200", subnet: "#{ip_range}.0/16"
+        magento.vm.network "forwarded_port", guest: 22, host: 2230, id: 'ssh', auto_correct: true
+        magento.vm.hostname = "magento"
+        magento.vm.provider 'docker' do |d|
+            d.image = "proxiblue/magento2:latest"
+            #d.build_dir = "./Docker/magento"
+            d.has_ssh = true
+            d.name = "magento"
+            d.create_args = ["--cap-add=NET_ADMIN"]
+            d.remains_running = true
+            d.volumes = ["/tmp/.X11-unix:/tmp/.X11-unix", ENV['HOME']+"/.ssh/:/home/vagrant/.ssh", ENV['HOME']+"/.composer:/home/vagrant/.composer"]
+            d.env = { "DEV_DOMAIN" => "#{dev_domain}", "WEB_IP" => "#{dev_domain}" }
+        end
+    end
+
 
     config.vm.define "vueapi", primary: false do |vueapi|
         vueapi.hostmanager.aliases = [ "vueapi."+dev_domain ]
@@ -280,6 +278,9 @@ Vagrant.configure('2') do |config|
         broker.ssh.username = "vagrant"
         broker.ssh.password = "vagrant"
         broker.ssh.keys_only = false
+        broker.trigger.after :up do |trigger|
+            trigger.run = {inline: "bash -c 'vagrant hostmanager --provider docker'"}
+        end
         broker.vm.provider 'docker' do |d|
             d.image = "enjo/ubuntu-devbox:latest"
             d.has_ssh = true
