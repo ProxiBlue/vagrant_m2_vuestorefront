@@ -110,7 +110,8 @@ RUN bash /tmp/generate_config > /opt/selenium/config.json && \
  /bin/chmod +x ./n98-magerun2.phar && \
  mv ./n98-magerun2.phar /usr/local/bin/n98-magerun && \
   /usr/bin/php -r "readfile('https://getcomposer.org/installer');" | /usr/bin/php && \
-   /bin/chmod a+rwx composer.phar && mv composer.phar /usr/local/bin/composer
+   /bin/chmod a+rwx composer.phar && mv composer.phar /usr/local/bin/composer && \
+   composer self-update --1
 
 RUN wget https://phar.phpunit.de/phpunit.phar && /bin/chmod a+rwx phpunit.phar && \
 mv phpunit.phar /usr/local/bin/phpunit.phar && \
